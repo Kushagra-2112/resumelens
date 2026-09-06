@@ -1,0 +1,14 @@
+@"
+.venv/
+venv/
+.env
+__pycache__/
+*.pyc
+models/
+*.pt
+*.bin
+*.safetensors
+*.pkl
+.ipynb_checkpoints/
+checkpoint-*/
+"@ | Out-File -FilePath .gitignore -Encoding utf8

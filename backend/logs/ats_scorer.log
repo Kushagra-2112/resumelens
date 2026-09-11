@@ -1,0 +1,9 @@
+2026-09-11 09:00:41,940 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:00:41,941 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:02:22,276 - WARNING - en_core_web_md not found — falling back to "en_core_web_sm
+2026-09-11 09:03:59,220 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:03:59,220 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:04:04,373 - WARNING - en_core_web_md not found — falling back to en_core_web_sm
+2026-09-11 09:04:06,779 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:04:06,779 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:04:12,174 - WARNING - en_core_web_md not found — falling back to en_core_web_sm

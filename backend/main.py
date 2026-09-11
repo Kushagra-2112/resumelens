@@ -3,20 +3,28 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.core.config import(
-    ALLOWED_ORIGINS, 
-    APP_DESCRIPTION, 
-    APP_TITLE, 
-    APP_VERSION, 
-    SPACY_MODEL_PRIMARY, 
-    SPACY_MODEL_SECONDARY, SENTENCE_TRANSFORMER_MODEL
+from backend.core.config import (
+    ALLOWED_ORIGINS,
+    APP_DESCRIPTION,
+    APP_TITLE,
+    APP_VERSION,
+    SPACY_MODEL_PRIMARY,
+    SPACY_MODEL_SECONDARY,
+    SENTENCE_TRANSFORMER_MODEL,
 )
 from backend.api.routes import router
 
-logger=logging.getLogger('ats_resume_scorer')
+# Without this, logger.info() calls are silently dropped — Python's default
+# logging config only surfaces WARNING and above.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
+logger = logging.getLogger('ats_resume_scorer')
+
 
 @asynccontextmanager
-async def lifespan(app:FastAPI):
+async def lifespan(app: FastAPI):
     logger.info('Starting ATS Resume Analyzer API...')
 
     logger.info(f'Loading spaCy NLP model: {SPACY_MODEL_PRIMARY}')
@@ -38,47 +46,49 @@ async def lifespan(app:FastAPI):
 
     yield
 
-    logger.info('shutting down the api!!')
+    logger.info('Shutting down the API...')
 
-app=FastAPI(
-    title=APP_TITLE, 
-    description=APP_DESCRIPTION, 
-    version=APP_VERSION, 
+
+app = FastAPI(
+    title=APP_TITLE,
+    description=APP_DESCRIPTION,
+    version=APP_VERSION,
     lifespan=lifespan,
     docs_url='/docs',
-    redoc_url='/redoc'
+    redoc_url='/redoc',
 )
 
 app.add_middleware(
-    CORSMiddleware, 
+    CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True, 
-    allow_methods     = ['*'],
-    allow_headers     = ['*'],
-
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
 )
 
 app.include_router(router)
 
+
 @app.get('/')
 async def root():
     return {
-        'name':      'ATS Resume Analyzer API',
-        'version':   '2.0.0',
+        'name': APP_TITLE,
+        'version': APP_VERSION,
         'endpoints': {
             'POST   /api/v1/analyze-resume': 'Analyze a resume',
-            'GET    /api/v1/history':        'Get user history',
-            'DELETE /api/v1/history/:id':    'Delete a history entry',
-            'GET    /api/v1/health':         'Health check',
-            'POST   /api/v1/generate-pdf':   'Generate PDF report from data',
+            'GET    /api/v1/history': 'Get user history',
+            'DELETE /api/v1/history/:id': 'Delete a history entry',
+            'GET    /api/v1/health': 'Health check',
+            'POST   /api/v1/generate-pdf': 'Generate PDF report from data',
         },
     }
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     import uvicorn
     uvicorn.run(
         'backend.main:app',
-        host    = '0.0.0.0',
-        port    = 8000,
-        reload  = True,    # Auto-restart on code changes (dev only)
+        host='0.0.0.0',
+        port=8000,
+        reload=True,  # Auto-restart on code changes (dev only)
     )

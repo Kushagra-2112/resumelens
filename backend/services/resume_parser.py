@@ -1,260 +1,260 @@
-import io
-import magic
-from typing import Tuple, Optional, Tuple
+import os
+import json 
+import logging
+from typing import Dict
 
-import pdfplumber
-from docx import Document
-import PyPDF2
+from groq import Groq
 
-from backend.utils.file_utils import(
-    FileParsingError, 
-    TextExtractionError, 
-    FileUploadError, 
-    log_error, 
-    log_warning, 
-    log_info, 
-    with_fallback
+logger=logging.getLogger('ats_resume_scorer')
+
+
+GROQ_MODEL='llama-3.3-70b-versatile'
+
+_client=None
+
+def _get_client()->Groq:
+    global _client
+    if _client is None:
+        api_key=os.getenv('GROQ_API_KEY')
+
+        if not api_key:
+            raise ValueError("GROQ_API_KEY environment variable not set")
+        _client=Groq(api_key=api_key)
+    return _client
+
+RESUME_SYSTEM_PROMPT = (
+    "You are a resume parser. Extract information from the resume "
+    "and return ONLY a valid JSON object. No explanation, no markdown."
 )
 
-from backend.core.config import (
-    MAX_FILE_SIZE_BYTES,
-    MAX_FILE_SIZE_MB, 
-    SUPPORTED_MIME_TYPES
+RESUME_USER_PROMPT = """Extract the following from this resume and return as JSON:
+{{
+  "name": "full name",
+  "email": "email address",
+  "phone": "phone number",
+  "linkedin": "LinkedIn URL if present, otherwise null",
+  "github": "GitHub URL if present, otherwise null",
+  "professional_summary": "the full text of the Summary, Profile, About Me, Objective, or Professional Summary section at the top of the resume. Copy the ENTIRE paragraph exactly as written. If no such section exists, return an empty string.",
+  "skills": ["list", "of", "skills"],
+  "experience": [
+    {{
+      "job_title": "",
+      "company": "",
+      "start_date": "",
+      "end_date": "",
+      "duration_months": 0,
+      "description": ""
+    }}
+  ],
+  "education": [
+    {{
+      "degree": "",
+      "institution": "",
+      "year": ""
+    }}
+  ],
+  "certifications": ["list of certifications"],
+  "projects": [
+    {{
+      "title": "project name",
+      "description": "what the project does and how it was built",
+      "technologies": ["tech", "used"]
+    }}
+  ],
+  "action_verbs": ["strong action verbs used in bullet points, e.g. developed, implemented, designed"],
+  "keywords": ["important keywords and phrases from the resume for ATS matching"]
+}}
+
+Important instructions:
+- For duration_months, calculate the number of months between start_date and end_date. If end_date is "Present" or "Current", calculate from start_date to now.
+- For skills, extract ALL technical and soft skills mentioned anywhere in the resume.
+- For action_verbs, find verbs that start bullet points or describe achievements.
+- For keywords, extract noun phrases and technical terms relevant to ATS matching.
+- Return ONLY valid JSON. No markdown code fences, no explanation.
+
+Resume Text:
+{raw_text}"""
+
+def _call_groq(client:Groq, system_prompt:str, user_prompt:str)->str:
+
+    response=client.chat.completions.create(
+        model=GROQ_MODEL, 
+        messages=[
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ],
+        temperature=0.0,
+        max_tokens=4096
+    )
+
+    return response.choices[0].message.content.strip()
+
+def _try_parse_json(text: str) -> dict | None:
+
+    # Strip markdown code fences if present
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+
+        # Remove opening fence (```json or ```)
+        first_newline = cleaned.index("\n") if "\n" in cleaned else len(cleaned)
+        cleaned = cleaned[first_newline + 1:]
+        # Remove closing fence
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        return None
+    
+def parse_resume(raw_text: str)->Dict:
+
+    client=_get_client()
+    prompt=RESUME_USER_PROMPT.format(raw_text=raw_text)
+    raw_response=_call_groq(client, RESUME_SYSTEM_PROMPT, prompt)
+    result=_try_parse_json(raw_response)
+
+    if result is None:
+        return _validate_resume_result(result)
+    
+
+    logger.warning("Groq resume parse: first attempt returned invalid JSON, retrying...")
+    strict_prompt = (
+        "Your previous response was not valid JSON. "
+        "Return ONLY the raw JSON object, no markdown, no explanation, no code fences.\n\n"
+        + prompt
+    )
+    raw_response = _call_groq(client, RESUME_SYSTEM_PROMPT, strict_prompt)
+    result = _try_parse_json(raw_response)
+    if result is not None:
+        return _validate_resume_result(result)
+
+    raise ValueError(
+        f"Groq returned unparseable response after retry. Raw response:\n{raw_response[:500]}"
+    )
+    
+JD_SYSTEM_PROMPT = (
+    "You are a job description parser. Extract information and "
+    "return ONLY a valid JSON object. No explanation, no markdown."
 )
 
-class FileParsingError(Exception):
-    pass
+JD_USER_PROMPT = """Extract the following from this job description and return as JSON:
+{{
+  "job_title": "",
+  "required_skills": ["list of must-have skills"],
+  "preferred_skills": ["list of nice-to-have skills"],
+  "experience_required": "",
+  "education_required": "",
+  "key_responsibilities": ["list of responsibilities"],
+  "keywords": ["important keywords and phrases for ATS matching"]
+}}
 
-class FileValidationError(Exception):
-    pass
+Important instructions:
+- required_skills: skills explicitly stated as required or must-have.
+- preferred_skills: skills stated as preferred, nice-to-have, or bonus.
+- keywords: extract ALL important terms an ATS system would match against,
+  including skills, technologies, certifications, and domain terms.
+- Return ONLY valid JSON. No markdown code fences, no explanation.
 
-def validate_file(file_data:bytes, filename:str)->Tuple[bool, str, Optional[str]]:
-    file_size_bytes = len(file_data)
-    if file_size_bytes > MAX_FILE_SIZE_BYTES:
-        size_mb = file_size_bytes / (1024 * 1024)
-        return False, (
-            f'File size ({size_mb:.2f} MB) exceeds the maximum of {MAX_FILE_SIZE_MB} MB. '
-            'Please upload a smaller file or compress your resume.'
-        ), None
-    
-    if file_size_bytes==0:
-        return False, 'uploade file is empty...please check the file you have uploaded and try again'
-    
-    try:
-        mime_type=magic.from_buffer(file_data, mime=True)
-    except Exception as e:
-        return False, f"error deteminin the file type : {e}", None
-    
-    if mime_type not in SUPPORTED_MIME_TYPES:
-        supported=', '.join(SUPPORTED_MIME_TYPES.keys()).upper()
-        return False, (
-            f'Unsupported file type: {mime_type}. '
-            f'Please upload one of: {supported}.'
-        ), None
-    
-    
+Job Description Text:
+{raw_text}"""
 
-    return True, '', SUPPORTED_MIME_TYPES[mime_type]
+def parse_job_description(raw_text: str) -> Dict:
+    client = _get_client()
+    prompt = JD_USER_PROMPT.format(raw_text=raw_text)
 
-def _extract_pdf_hyperlinks(file_data: bytes) -> str:
-    urls = []
-    try:
-        reader = PyPDF2.PdfReader(io.BytesIO(file_data))
-        for page in reader.pages:
-            if '/Annots' not in page:
-                continue
-            for annot_ref in page['/Annots']:
-                try:
-                    annot = annot_ref.get_object()
-                    if annot.get('/Subtype') != '/Link':
-                        continue
-                    action = annot.get('/A', {})
-                    uri = action.get('/URI', '')
-                    if uri and isinstance(uri, (str, bytes)):
-                        # PyPDF2 may return bytes for URI values
-                        if isinstance(uri, bytes):
-                            uri = uri.decode('utf-8', errors='ignore')
-                        uri = uri.strip()
-                        if uri.startswith('http'):
-                            urls.append(uri)
-                except Exception:
-                    pass
-    except Exception:
-        pass
-    return '\n'.join(urls)
+    raw_response = _call_groq(client, JD_SYSTEM_PROMPT, prompt)
+    result = _try_parse_json(raw_response)
+    if result is not None:
+        return _validate_jd_result(result)
 
-
-def _extract_pdf_with_pdfplumber(file_data: bytes) -> str:
-    text = ''
-    with pdfplumber.open(io.BytesIO(file_data)) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + '\n'
-
-    if not text.strip():
-        raise TextExtractionError(
-            'pdfplumber extracted no text',
-            user_message='No text could be extracted from the PDF.'
-        )
-    
-    hyperlinks = _extract_pdf_hyperlinks(file_data)
-    if hyperlinks:
-        text = text.strip() + '\n' + hyperlinks
-
-    return text.strip()
-
-
-def _extract_pdf_with_pypdf2(file_data: bytes) -> str:
-    text = ''
-    pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_data))
-    for page in pdf_reader.pages:
-        page_text = page.extract_text()
-        if page_text:
-            text += page_text + '\n'
-
-    if not text.strip():
-        raise TextExtractionError(
-            'PyPDF2 extracted no text',
-            user_message='No text could be extracted from the PDF.'
-        )
-
-    hyperlinks = _extract_pdf_hyperlinks(file_data)
-    if hyperlinks:
-        text = text.strip() + '\n' + hyperlinks
-
-    return text.strip()
-
-
-def extract_text_from_pdf(file_data: bytes) -> str:
-    try: 
-        result, used_fallback=with_fallback(
-        _extract_pdf_with_pdfplumber, 
-        _extract_pdf_with_pypdf2, 
-        file_data, 
-        log_fallback=True
+    logger.warning("Groq JD parse: first attempt returned invalid JSON, retrying...")
+    strict_prompt = (
+        "Your previous response was not valid JSON. "
+        "Return ONLY the raw JSON object, no markdown, no explanation, no code fences.\n\n"
+        + prompt
     )
-    
-        if used_fallback:
-            log_info('PDF EXTRACTION succeded using the PyPDF2 fallback', context='resume_parser')
-        return result
-        
-    except Exception as e:
-        log_error(e, context='extract_text_from_pdf')
-        raise FileParsingError(
-            'Failed to extract text from PDF using both pdfplumber and PyPDF2. '
-            'The PDF may be corrupted, password-protected, or contain only scanned images. '
-            'Please ensure it contains selectable text.'
-        ) from e
-    
+    raw_response = _call_groq(client, JD_SYSTEM_PROMPT, strict_prompt)
+    result = _try_parse_json(raw_response)
+    if result is not None:
+        return _validate_jd_result(result)
 
-def extract_text_from_docx(file_data: bytes) -> str:
-    try:
-        doc = Document(io.BytesIO(file_data))
-        text_parts = []
-
-        for paragraph in doc.paragraphs:
-            if paragraph.text.strip():
-                text_parts.append(paragraph.text)
-
-        for table in doc.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    if cell.text.strip():
-                        text_parts.append(cell.text)
-
-        text = '\n'.join(text_parts)
-
-        if not text.strip():
-            raise FileParsingError(
-                'No text could be extracted from the document. '
-                'The document may be empty or corrupted.'
-            )
-        
-        try:
-            for rel in doc.part.rels.values():
-                if 'hyperlink' in rel.reltype.lower():
-                    url = rel._target
-                    if isinstance(url, str) and url.startswith('http'):
-                        text += '\n' + url
-        except Exception:
-            pass
-
-        log_info(f'Extracted {len(text)} chars from DOCX', context='resume_parser')
-        return text.strip()
-
-    except FileParsingError:
-        raise   # Re-raise unchanged — don't wrap in another FileParsingError
-
-    except Exception as e:
-        log_error(e, context='extract_text_from_docx')
-        raise FileParsingError(
-            'Failed to extract text from DOCX. '
-            'The document may be corrupted or in an unsupported format. '
-            'Please try re-saving or converting to PDF.'
-        ) from e
-
-def extract_text_from_doc(file_data: bytes) -> str:
-    raise FileParsingError(
-        'Legacy .doc format is not supported. '
-        'Please convert your document to .docx or .pdf and try again. '
-        'You can convert using Microsoft Word, Google Docs, or online tools.'
+    raise ValueError(
+        f"Groq returned unparseable response after retry. Raw response:\n{raw_response[:500]}"
     )
 
-def extract_text(file_data:bytes, file_type:str)->str:
-    if file_type=='pdf':
-        return extract_text_from_pdf(file_data)
-    elif file_type=='docx':
-        return extract_text_from_docx(file_data)
-    elif file_type=='doc':
-        return extract_text_from_doc(file_data)
-    else:
-        raise FileValidationError(
-            f'invalid file type: {file_type}. supported types are: pdf, docx and doc'
-
-
-        )
+#it will make sure, that the parse json has all the valid fields we expect
+def _validate_jd_result(result: dict) -> dict:
     
-def parse_resume_file(file_data: bytes, filename:str)->Tuple[str, dict]:
-    log_info(f'parsing file :{filename}', context='parse_Resume_file')
-
-    #phase01:validate file
-    try:
-        is_valid, error_msg, file_type=validate_file(file_data, filename)
-        if not is_valid:
-            log_warning(f'valiudation failed for file {filename}', context='parse_resume_file')
-            raise FileValidationError(error_msg)
-    
-    except FileValidationError as e:
-        raise 
-
-    except Exception as e:
-        log_error(e, context='parse_resume_file_validation')
-        raise FileValidationError(
-            'Could not validate the uploaded file. Please ensure it is a valid PDF or DOCX.'
-        ) from e
-    
-    #phase02: extraction of file
-
-    try:
-        text = extract_text(file_data, file_type)
-        log_info(f'Extracted {len(text)} chars from {filename}', context='parse_resume_file')
-
-    except FileParsingError:
-        raise   # Re-raise unchanged
-
-    except Exception as e:
-        log_error(e, context='parse_resume_file_extraction')
-        raise FileParsingError(
-            'An unexpected error occurred while processing the file. '
-            'Please try again or contact support if the problem persists.'
-        ) from e
-
-    metadata = {
-        'filename':        filename,
-        'file_type':       file_type,
-        'file_size_bytes': len(file_data),
-        'text_length':     len(text),
-        'success':         True,
+    defaults = {
+        "job_title": "",
+        "required_skills": [],
+        "preferred_skills": [],
+        "experience_required": "",
+        "education_required": "",
+        "key_responsibilities": [],
+        "keywords": [],
     }
-    return text, metadata
+
+    for key, default in defaults.items():
+        if key not in result or result[key] is None:
+            result[key] = default
+        if isinstance(default, list) and not isinstance(result[key], list):
+            result[key] = default
+
+    return result
+
+
+#to make sure the parse json has all the valid json fields
+def _validate_resume_result(result: dict) -> dict:
+
+    defaults = {
+        "name": "",
+        "email": None,
+        "phone": None,
+        "linkedin": None,
+        "github": None,
+        "professional_summary": "",
+        "skills": [],
+        "experience": [],
+        "education": [],
+        "certifications": [],
+        "projects": [],
+        "action_verbs": [],
+        "keywords": [],
+    }
+    for key, default in defaults.items():
+        if key not in result or result[key] is None:
+            result[key] = default
+            
+        # Ensure list fields are actually lists
+        if isinstance(default, list) and not isinstance(result[key], list):
+            result[key] = default
+
+    #Validate experience entries
+    for exp in result.get("experience", []):
+        if not isinstance(exp, dict):
+            continue
+        exp.setdefault("job_title", "")
+        exp.setdefault("company", "")
+        exp.setdefault("start_date", "")
+        exp.setdefault("end_date", "")
+        exp.setdefault("duration_months", 0)
+        exp.setdefault("description", "")
+        #Ensure duration_months is an int
+        try:
+            exp["duration_months"] = int(exp["duration_months"])
+        except (ValueError, TypeError):
+            exp["duration_months"] = 0
+
+    #Validate project entries
+    for proj in result.get("projects", []):
+        if not isinstance(proj, dict):
+            continue
+        proj.setdefault("title", "")
+        proj.setdefault("description", "")
+        proj.setdefault("technologies", [])
+
+    return result
+

@@ -7,3 +7,31 @@
 2026-09-11 09:04:06,779 - INFO - Starting ATS Resume Analyzer API...
 2026-09-11 09:04:06,779 - INFO - Loading spaCy NLP model: en_core_web_md
 2026-09-11 09:04:12,174 - WARNING - en_core_web_md not found — falling back to en_core_web_sm
+2026-09-11 09:17:56,336 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:17:56,336 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:18:07,784 - INFO - Loaded en_core_web_md
+2026-09-11 09:18:07,786 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-11 09:19:54,547 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-11 09:19:54,551 - INFO - All models loaded. API is ready to serve requests.
+2026-09-11 09:23:39,701 - INFO - Shutting down the API...
+2026-09-11 09:23:43,217 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:23:43,218 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:23:52,988 - INFO - Loaded en_core_web_md
+2026-09-11 09:23:52,989 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-11 09:24:18,215 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-11 09:24:18,215 - INFO - All models loaded. API is ready to serve requests.
+2026-09-11 09:25:04,518 - INFO - Shutting down the API...
+2026-09-11 09:29:31,900 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:29:31,901 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:29:39,614 - INFO - Loaded en_core_web_md
+2026-09-11 09:29:39,614 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-11 09:30:01,958 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-11 09:30:01,958 - INFO - All models loaded. API is ready to serve requests.
+2026-09-11 09:30:02,074 - INFO - Shutting down the API...
+2026-09-11 09:30:05,310 - INFO - Starting ATS Resume Analyzer API...
+2026-09-11 09:30:05,311 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-11 09:30:12,810 - INFO - Loaded en_core_web_md
+2026-09-11 09:30:12,810 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-11 09:30:35,354 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-11 09:30:35,355 - INFO - All models loaded. API is ready to serve requests.
+2026-09-11 09:45:48,629 - INFO - Shutting down the API...

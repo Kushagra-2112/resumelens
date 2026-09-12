@@ -2,6 +2,10 @@ import streamlit as st
 import sys
 from pathlib import Path
 
+import os
+st.write("DEBUG — SUPABASE_URL:", os.getenv("SUPABASE_URL"))
+st.write("DEBUG — SUPABASE_ANON_KEY set:", bool(os.getenv("SUPABASE_ANON_KEY")))
+
 # Put the repo root on sys.path so `from frontend.views import ...` resolves
 # regardless of the directory streamlit was launched from.
 sys.path.insert(0, str(Path(__file__).parent.parent))

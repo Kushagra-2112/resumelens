@@ -5,7 +5,11 @@ from backend.models.schemas import IssueDetail
 from backend.services.groq_parser import parse_resume, parse_job_description
 from backend.services.jd_matcher import compare_resume_with_jd
 from backend.services.feedback_engine import analyze_issues, generate_issues_summary
-from backend.services.ats_scorer import calculate_overall_score, validate_skills_with_projects
+from backend.services.ats_scorer import (
+    calculate_overall_score,
+    validate_skills_with_projects,
+    generate_improvements,
+)
 
 
 def analyze_full_resume(
@@ -21,10 +25,10 @@ def analyze_full_resume(
     logger.info(f"Groq parsed skills count: {len(parsed_resume.get('skills', []))}")
     logger.info(f"Groq parsed experience count: {len(parsed_resume.get('experience', []))}")
 
-    skills          = parsed_resume.get('skills', [])
-    projects        = parsed_resume.get('projects', [])
-    keywords        = parsed_resume.get('keywords', [])
-    action_verbs    = parsed_resume.get('action_verbs', [])
+    skills = parsed_resume.get('skills', [])
+    projects = parsed_resume.get('projects', [])
+    keywords = parsed_resume.get('keywords', [])
+    action_verbs = parsed_resume.get('action_verbs', [])
 
     experience_months = sum(
         int(e.get('duration_months', 0))
@@ -33,10 +37,10 @@ def analyze_full_resume(
     )
 
     contact_info = {
-        'email':     parsed_resume.get('email'),
-        'phone':     parsed_resume.get('phone'),
-        'linkedin':  parsed_resume.get('linkedin'),
-        'github':    parsed_resume.get('github'),
+        'email': parsed_resume.get('email'),
+        'phone': parsed_resume.get('phone'),
+        'linkedin': parsed_resume.get('linkedin'),
+        'github': parsed_resume.get('github'),
         'portfolio': None,
     }
     skill_validation = validate_skills_with_projects(
@@ -68,7 +72,7 @@ def analyze_full_resume(
     from backend.utils.file_utils import (
         get_default_grammar_results, get_default_location_results,
     )
-    grammar_results  = get_default_grammar_results()
+    grammar_results = get_default_grammar_results()
     location_results = get_default_location_results()
 
     scores = calculate_overall_score(
@@ -96,50 +100,62 @@ def analyze_full_resume(
 
     issues_summary = generate_issues_summary(detailed_feedback)
 
-    validated_raw   = skill_validation.get('validated_skills', [])
+    # Critical issues = the subset of detailed_feedback flagged as High
+    # severity, rather than reusing the full issues_summary (which mixes
+    # High/Moderate/Low issues together).
+    critical_issues = [
+        issue.issue_title for issue in detailed_feedback
+        if issue.severity_level == "High"
+    ]
+
+    # Actionable, score-driven suggestions (separate from the specific
+    # per-issue feedback in detailed_feedback).
+    suggestions = generate_improvements(scores, skill_validation)
+
+    validated_raw = skill_validation.get('validated_skills', [])
     unvalidated_raw = skill_validation.get('unvalidated_skills', [])
-    total_skills    = len(validated_raw) + len(unvalidated_raw)
-    val_pct         = round((len(validated_raw) / total_skills * 100) if total_skills > 0 else 0, 1)
+    total_skills = len(validated_raw) + len(unvalidated_raw)
+    val_pct = round((len(validated_raw) / total_skills * 100) if total_skills > 0 else 0, 1)
 
     skill_validation_details = {
         "validated": [
             {
-                "skill":    item['skill'],
+                "skill": item['skill'],
                 "projects": item.get('projects', []),
             }
             for item in validated_raw
         ],
-        "unvalidated":     unvalidated_raw,
-        "total":           total_skills,
+        "unvalidated": unvalidated_raw,
+        "total": total_skills,
         "validated_count": len(validated_raw),
-        "validation_pct":  val_pct,
+        "validation_pct": val_pct,
     }
 
     return {
-        "ATS_score":          scores['overall_score'],
-        "ats_score":          scores['overall_score'],
+        "ats_score": scores['overall_score'],
         "component_scores": {
-            "formatting":       scores['formatting_score'],
-            "keywords":         scores['keywords_score'],
-            "content":          scores['content_score'],
+            "formatting": scores['formatting_score'],
+            "keywords": scores['keywords_score'],
+            "content": scores['content_score'],
             "skill_validation": scores['skill_validation_score'],
             "ats_compatibility": scores['ats_compatibility_score'],
         },
-        "issues_summary":    issues_summary,
+        "issues_summary": issues_summary,
         "detailed_feedback": detailed_feedback,
-        "jd_match_analysis": jd_comparison_result,
-        "jd_comparison":     jd_comparison_result,
-        "skills":            skills,
-        "matched_keywords":  (
+        "jd_comparison": jd_comparison_result,
+        "skills": skills,
+        "matched_keywords": (
             jd_comparison_result['matched_keywords']
             if jd_comparison_result else list(keywords[:20])
         ),
-        "missing_keywords":  (
+        "missing_keywords": (
             jd_comparison_result['missing_keywords']
             if jd_comparison_result else []
         ),
         "strengths": _generate_strengths(parsed_resume, skills, projects, action_verbs, skill_validation, scores),
-        "interpretation":    scores.get('overall_interpretation', ''),
+        "critical_issues": critical_issues,
+        "suggestions": suggestions,
+        "interpretation": scores.get('overall_interpretation', ''),
         "skill_validation_details": skill_validation_details,
         "experience_months": experience_months,
     }

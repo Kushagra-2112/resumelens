@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ATS Resume Analysis Report</title>
+<style>
+  body {
+    font-family: 'DejaVu Sans', Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+    padding: 24px;
+  }
+  h1 {
+    color: #4338ca;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+  .score-box {
+    text-align: center;
+    background: #eef2ff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .score-number {
+    font-size: 48px;
+    font-weight: bold;
+    color: #4338ca;
+  }
+  .score-label {
+    font-size: 14px;
+    color: #4b5563;
+  }
+  .interpretation {
+    font-size: 13px;
+    color: #374151;
+    margin-top: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 12px;
+  }
+  th {
+    color: #6b7280;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  .bar-bg {
+    background: #e5e7eb;
+    border-radius: 6px;
+    height: 8px;
+    width: 100%;
+  }
+  .bar-fill {
+    background: #4f46e5;
+    border-radius: 6px;
+    height: 8px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <h1>ATS Resume Analysis Report</h1>
+  <div class="subtitle">Generated for: {{ filename | default("your resume") }}</div>
+
+  <div class="score-box">
+    <div class="score-number">{{ ats_score | default(0) }}</div>
+    <div class="score-label">Overall ATS Score / 100</div>
+    <div class="interpretation">{{ interpretation | default("No analysis available.") }}</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Score</th>
+        <th style="width: 40%;">Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for label, value, max_val in component_rows %}
+      {% set pct = ((value / max_val * 100) | round | int) if max_val else 0 %}
+      <tr>
+        <td>{{ label }}</td>
+        <td>{{ value }} / {{ max_val }}</td>
+        <td>
+          <table class="bar-bg" style="padding: 0; border: none; margin: 0;">
+            <tr>
+              <td class="bar-fill" width="{{ pct }}%" style="padding: 0; border: none;"></td>
+              <td width="{{ 100 - pct }}%" style="padding: 0; border: none;"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

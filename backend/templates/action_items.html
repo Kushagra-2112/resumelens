@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; color: #1f2937; margin: 0; padding: 24px; }
+  h2 { color: #4338ca; font-size: 18px; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  .issue { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; page-break-inside: avoid; }
+  .issue-title { font-size: 13px; font-weight: bold; color: #1f2937; }
+  .severity { display: inline-block; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 8px; border-radius: 8px; margin-left: 8px; }
+  .sev-high { background: #fee2e2; color: #991b1b; }
+  .sev-moderate { background: #fef3c7; color: #92400e; }
+  .sev-low { background: #e0e7ff; color: #3730a3; }
+  .explanation { font-size: 11px; color: #4b5563; margin: 6px 0; }
+  .fix-label { font-size: 10px; font-weight: bold; color: #4338ca; margin-top: 6px; }
+  ul { margin: 4px 0 0 0; padding-left: 16px; }
+  li { font-size: 11px; margin-bottom: 3px; }
+  .empty { color: #6b7280; font-size: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+  <h2>Detailed Feedback ({{ issues|length }} issue{{ 's' if issues|length != 1 else '' }})</h2>
+
+  {% if issues %}
+    {% for issue in issues %}
+    <div class="issue">
+      <span class="issue-title">{{ issue.issue_title }}</span>
+      <span class="severity sev-{{ issue.severity_level|lower }}">{{ issue.severity_level }}</span>
+      <div class="explanation">{{ issue.explanation }}</div>
+      <div class="fix-label">How to fix:</div>
+      <div class="explanation">{{ issue.how_to_fix }}</div>
+      {% if issue.action_items %}
+      <ul>
+        {% for action in issue.action_items %}<li>{{ action }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">No specific issues were flagged in this analysis.</p>
+  {% endif %}
+</body>
+</html>

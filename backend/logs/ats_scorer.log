@@ -166,3 +166,25 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 2026-09-12 10:03:20,832 - INFO - Loading spaCy NLP model: en_core_web_md
 2026-09-12 10:03:28,911 - INFO - Loaded en_core_web_md
 2026-09-12 10:03:28,912 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 10:03:52,292 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 10:03:52,292 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 15:23:09,243 - INFO - Parsed 'Kushagra_Sharma.pdf': 3377 chars extracted
+2026-09-12 15:23:21,195 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience building and deploying machine learning sys'
+2026-09-12 15:23:21,195 - INFO - Groq parsed skills count: 41
+2026-09-12 15:23:21,195 - INFO - Groq parsed experience count: 2
+2026-09-12 15:23:45,511 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-12 15:37:23,963 - INFO - Shutting down the API...
+2026-09-12 15:37:29,738 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 15:37:29,738 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 15:37:40,933 - INFO - Loaded en_core_web_md
+2026-09-12 15:37:40,933 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 15:38:59,062 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 15:38:59,063 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 15:38:59,175 - INFO - Shutting down the API...
+2026-09-12 15:50:01,215 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience building and deploying machine learning sys'
+2026-09-12 15:50:01,215 - INFO - Groq parsed skills count: 41
+2026-09-12 15:50:01,216 - INFO - Groq parsed experience count: 2
+2026-09-12 15:50:20,675 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-12 15:53:29,376 - INFO - Shutting down the API...

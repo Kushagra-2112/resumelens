@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; color: #1f2937; margin: 0; padding: 24px; }
+  h2 { color: #4338ca; font-size: 18px; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  ul { margin: 0 0 20px 0; padding-left: 18px; }
+  li { font-size: 12px; margin-bottom: 6px; line-height: 1.5; }
+  .strengths li { color: #065f46; }
+  .critical li { color: #991b1b; }
+  .empty { color: #6b7280; font-size: 12px; font-style: italic; }
+</style>
+</head>
+<body>
+  <h2>Strengths</h2>
+  {% if strengths %}
+    <ul class="strengths">
+      {% for item in strengths %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Keep improving your resume to unlock strengths.</p>
+  {% endif %}
+
+  <h2>Critical Issues</h2>
+  {% if critical_issues %}
+    <ul class="critical">
+      {% for item in critical_issues %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No critical issues detected.</p>
+  {% endif %}
+
+  <h2>Suggested Improvements</h2>
+  {% if suggestions %}
+    <ul>
+      {% for item in suggestions %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No specific improvements flagged at this time.</p>
+  {% endif %}
+</body>
+</html>

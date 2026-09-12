@@ -35,3 +35,130 @@
 2026-09-11 09:30:35,354 - INFO - Loaded all-MiniLM-L6-v2
 2026-09-11 09:30:35,355 - INFO - All models loaded. API is ready to serve requests.
 2026-09-11 09:45:48,629 - INFO - Shutting down the API...
+2026-09-12 09:27:38,012 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:27:38,013 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:27:48,891 - INFO - Loaded en_core_web_md
+2026-09-12 09:27:48,893 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:28:20,655 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:28:20,655 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:28:29,682 - ERROR - File parsing failed: cannot import name 'FileParsingError' from 'backend.services.resume_parser' (C:\Users\kusha\resumelens\backend\services\resume_parser.py)
+2026-09-12 09:29:15,657 - INFO - Shutting down the API...
+2026-09-12 09:29:18,777 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:29:18,777 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:29:27,632 - INFO - Loaded en_core_web_md
+2026-09-12 09:29:27,633 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:29:54,015 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:29:54,016 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:29:55,782 - ERROR - File parsing failed: cannot import name 'FileValidationError' from 'backend.services.resume_parser' (C:\Users\kusha\resumelens\backend\services\resume_parser.py)
+2026-09-12 09:30:36,817 - INFO - Shutting down the API...
+2026-09-12 09:30:40,206 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:30:40,207 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:30:48,539 - INFO - Loaded en_core_web_md
+2026-09-12 09:30:48,540 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:31:15,413 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:31:15,414 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:31:17,207 - ERROR - File parsing failed: cannot import name 'FileValidationError' from 'backend.services.resume_parser' (C:\Users\kusha\resumelens\backend\services\resume_parser.py)
+2026-09-12 09:32:49,628 - INFO - Shutting down the API...
+2026-09-12 09:32:53,254 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:32:53,255 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:33:02,753 - INFO - Loaded en_core_web_md
+2026-09-12 09:33:02,753 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:33:28,854 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:33:28,855 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:33:30,523 - ERROR - File parsing failed: cannot import name 'parse_resume_file' from 'backend.services.resume_parser' (C:\Users\kusha\resumelens\backend\services\resume_parser.py)
+2026-09-12 09:34:08,451 - ERROR - File parsing failed: cannot import name 'parse_resume_file' from 'backend.services.resume_parser' (C:\Users\kusha\resumelens\backend\services\resume_parser.py)
+2026-09-12 09:35:21,339 - INFO - Shutting down the API...
+2026-09-12 09:35:24,752 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:35:24,753 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:35:31,446 - INFO - Loaded en_core_web_md
+2026-09-12 09:35:31,447 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:35:53,607 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:35:53,607 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:36:02,771 - ERROR - File parsing failed: parse_resume_file() takes 1 positional argument but 2 were given
+2026-09-12 09:36:48,515 - INFO - Shutting down the API...
+2026-09-12 09:36:51,550 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:36:51,550 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:36:57,608 - INFO - Loaded en_core_web_md
+2026-09-12 09:36:57,608 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:37:17,639 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:37:17,639 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:37:25,713 - ERROR - File parsing failed: cannot unpack non-iterable coroutine object
+2026-09-12 09:38:10,172 - INFO - Shutting down the API...
+2026-09-12 09:38:13,897 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:38:13,899 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:38:20,263 - INFO - Loaded en_core_web_md
+2026-09-12 09:38:20,263 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:38:40,399 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:38:40,399 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:38:40,511 - INFO - Shutting down the API...
+2026-09-12 09:38:43,402 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:38:43,402 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:38:49,380 - INFO - Loaded en_core_web_md
+2026-09-12 09:38:49,380 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:39:08,688 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:39:08,688 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:39:18,049 - ERROR - File parsing failed: cannot unpack non-iterable coroutine object
+2026-09-12 09:39:23,313 - ERROR - File parsing failed: cannot unpack non-iterable coroutine object
+2026-09-12 09:39:56,745 - INFO - Shutting down the API...
+2026-09-12 09:39:59,825 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:39:59,825 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:40:06,003 - INFO - Loaded en_core_web_md
+2026-09-12 09:40:06,004 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:40:29,719 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:40:29,724 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:40:29,840 - INFO - Shutting down the API...
+2026-09-12 09:40:33,366 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:40:33,366 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:40:41,332 - INFO - Loaded en_core_web_md
+2026-09-12 09:40:41,333 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:41:06,561 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:41:06,561 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:41:10,242 - ERROR - File parsing failed: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2026-09-12 09:41:47,923 - INFO - Shutting down the API...
+2026-09-12 09:41:51,621 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:41:51,621 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:41:59,505 - INFO - Loaded en_core_web_md
+2026-09-12 09:41:59,506 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:42:23,810 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:42:23,810 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:42:45,515 - ERROR - File parsing failed: Error code: 404 - {'error': {'message': 'The model `llama-3.1-8b-instant` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2026-09-12 09:45:59,954 - INFO - Shutting down the API...
+2026-09-12 09:46:04,168 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:46:04,168 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:46:12,194 - INFO - Loaded en_core_web_md
+2026-09-12 09:46:12,195 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:46:35,071 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:46:35,072 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:46:58,344 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-12 09:47:03,356 - ERROR - Full analysis pipeline failed: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2026-09-12 09:47:22,984 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-12 09:47:23,554 - ERROR - Full analysis pipeline failed: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2026-09-12 09:48:19,278 - INFO - Parsed 'Kushagra_Sharma.pdf': 3377 chars extracted
+2026-09-12 09:48:20,321 - ERROR - Full analysis pipeline failed: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}
+2026-09-12 09:50:33,886 - INFO - Shutting down the API...
+2026-09-12 09:50:38,450 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:50:38,454 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:50:46,723 - INFO - Loaded en_core_web_md
+2026-09-12 09:50:46,724 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:51:10,959 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:51:10,964 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:51:11,097 - INFO - Shutting down the API...
+2026-09-12 09:51:14,705 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 09:51:14,706 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 09:51:23,098 - INFO - Loaded en_core_web_md
+2026-09-12 09:51:23,098 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2
+2026-09-12 09:51:47,759 - INFO - Loaded all-MiniLM-L6-v2
+2026-09-12 09:51:47,759 - INFO - All models loaded. API is ready to serve requests.
+2026-09-12 09:51:58,576 - INFO - Parsed 'Kushagra_Sharma.pdf': 3377 chars extracted
+2026-09-12 09:52:05,515 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience building and deploying machine learning sys'
+2026-09-12 09:52:05,515 - INFO - Groq parsed skills count: 40
+2026-09-12 09:52:05,515 - INFO - Groq parsed experience count: 2
+2026-09-12 09:52:24,343 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-12 09:53:57,716 - INFO - Parsed 'Kushagra_Sharma.pdf': 3377 chars extracted
+2026-09-12 09:54:04,948 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience building and deploying machine learning sys'
+2026-09-12 09:54:04,948 - INFO - Groq parsed skills count: 41
+2026-09-12 09:54:04,949 - INFO - Groq parsed experience count: 2
+2026-09-12 09:54:24,579 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-12 10:03:16,860 - INFO - Shutting down the API...

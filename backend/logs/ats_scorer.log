@@ -162,3 +162,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 2026-09-12 09:54:24,579 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
 2026-09-12 10:03:16,860 - INFO - Shutting down the API...
+2026-09-12 10:03:20,830 - INFO - Starting ATS Resume Analyzer API...
+2026-09-12 10:03:20,832 - INFO - Loading spaCy NLP model: en_core_web_md
+2026-09-12 10:03:28,911 - INFO - Loaded en_core_web_md
+2026-09-12 10:03:28,912 - INFO - Loading SentenceTransformer: all-MiniLM-L6-v2

@@ -207,3 +207,48 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 2026-09-12 17:31:06,688 - INFO - Groq parsed experience count: 2
 2026-09-12 17:31:18,781 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-13 07:59:56,355 - INFO - Groq parsed summary: ''
+2026-09-13 07:59:56,356 - INFO - Groq parsed skills count: 75
+2026-09-13 07:59:56,357 - INFO - Groq parsed experience count: 0
+2026-09-13 07:59:58,530 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-13 08:00:29,028 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-13 08:00:50,825 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-13 08:00:50,826 - INFO - Groq parsed skills count: 30
+2026-09-13 08:00:50,828 - INFO - Groq parsed experience count: 2
+2026-09-13 08:01:03,334 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-13 08:04:09,501 - INFO - Shutting down the API...
+2026-09-13 08:18:18,618 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-13 08:18:18,618 - INFO - Groq parsed skills count: 29
+2026-09-13 08:18:18,618 - INFO - Groq parsed experience count: 2
+2026-09-13 08:18:29,447 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-13 08:18:57,682 - INFO - Generated combined PDF (8468 bytes) from 1 sections
+2026-09-13 08:22:52,854 - INFO - Shutting down the API...
+2026-09-13 08:25:32,260 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-13 08:25:32,261 - INFO - Groq parsed skills count: 33
+2026-09-13 08:25:32,261 - INFO - Groq parsed experience count: 2
+2026-09-13 08:25:45,918 - ERROR - Failed to save analysis to Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-13 08:26:08,899 - INFO - Generated combined PDF (8518 bytes) from 1 sections
+2026-09-13 08:26:44,697 - ERROR - Failed to fetch history from Supabase: Client error '404 Not Found' for url 'https://hqwmpezvvakvwucfodca.supabase.co/rest/v1/analyses?user_id=eq.4b424801-d792-4e1c-857a-a11c8637e91c&order=created_at.desc'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404 — response body: {"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table 'public.analyses' in the schema cache"}
+2026-09-13 15:46:38,669 - INFO - Shutting down the API...
+2026-09-13 15:48:54,366 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-13 15:48:54,367 - INFO - Groq parsed skills count: 33
+2026-09-13 15:48:54,367 - INFO - Groq parsed experience count: 2
+2026-09-13 15:49:04,958 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 1
+2026-09-13 15:49:39,708 - INFO - Generated combined PDF (8518 bytes) from 1 sections
+2026-09-13 15:57:54,505 - INFO - Shutting down the API...
+2026-09-13 16:00:16,611 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-13 16:00:16,612 - INFO - Groq parsed skills count: 35
+2026-09-13 16:00:16,612 - INFO - Groq parsed experience count: 2
+2026-09-13 16:00:27,172 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 2
+2026-09-13 16:00:44,385 - INFO - Generated combined PDF (16271 bytes) from 4 sections
+2026-09-13 16:01:48,011 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-13 16:01:55,500 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-13 16:01:55,501 - INFO - Groq parsed skills count: 30
+2026-09-13 16:01:55,504 - INFO - Groq parsed experience count: 2
+2026-09-13 16:02:07,419 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 3
+2026-09-13 16:02:32,379 - INFO - Generated combined PDF (16111 bytes) from 4 sections

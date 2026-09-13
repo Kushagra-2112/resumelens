@@ -1,8 +1,8 @@
 """
-Combines multiple rendered HTML report sections into a single downloadable
-PDF using WeasyPrint. Sections are concatenated into one HTML document with
-CSS page breaks between them, then rendered in a single WeasyPrint pass —
-simpler and more reliable than generating separate PDFs and merging them.
+Combines the four rendered HTML report sections into a single downloadable
+PDF using WeasyPrint. Section keys must match exactly what
+report_generator.generate_html_reports() returns:
+'summary', 'skill_report', 'jd_report', 'recommendations'.
 """
 
 import logging
@@ -13,7 +13,8 @@ from weasyprint import HTML
 logger = logging.getLogger('ats_resume_scorer')
 
 # Order matters — this is the order sections appear in the final PDF.
-_SECTION_ORDER = ['summary', 'jd_comparison', 'action_items', 'quick_actions']
+# Keys must match report_generator.generate_html_reports()'s return dict.
+_SECTION_ORDER = ['summary', 'skill_report', 'jd_report', 'recommendations']
 
 
 def _extract_body(html_doc: str) -> str:
@@ -35,9 +36,9 @@ def generate_combined_pdf(html_docs: Dict[str, str]) -> bytes:
     for i, section_name in enumerate(_SECTION_ORDER):
         html_doc = html_docs.get(section_name)
         if not html_doc:
+            logger.warning(f"PDF section '{section_name}' was missing or empty — skipped")
             continue
         body = _extract_body(html_doc)
-        # Force each section (after the first) onto its own page.
         page_break = 'page-break-before: always;' if i > 0 else ''
         body_sections.append(f'<div style="{page_break}">{body}</div>')
 

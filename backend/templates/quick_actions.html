@@ -4,40 +4,45 @@
 <meta charset="UTF-8">
 <style>
   body { font-family: 'DejaVu Sans', Arial, sans-serif; color: #1f2937; margin: 0; padding: 24px; }
-  h2 { color: #4338ca; font-size: 18px; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
-  ul { margin: 0 0 20px 0; padding-left: 18px; }
-  li { font-size: 12px; margin-bottom: 6px; line-height: 1.5; }
-  .strengths li { color: #065f46; }
-  .critical li { color: #991b1b; }
+  h1 { color: #4338ca; font-size: 18px; margin-bottom: 16px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  .stats-row { display: table; width: 100%; margin-bottom: 20px; }
+  .stat { display: table-cell; text-align: center; padding: 10px; }
+  .stat-num { font-size: 26px; font-weight: bold; color: #4338ca; }
+  .stat-label { font-size: 10px; color: #6b7280; text-transform: uppercase; }
+  h2 { font-size: 13px; margin: 16px 0 8px 0; color: #374151; }
+  .skill-row { border-bottom: 1px solid #f3f4f6; padding: 6px 0; font-size: 11px; }
+  .skill-name { font-weight: bold; }
+  .skill-projects { color: #6b7280; }
+  .chip { display: inline-block; background: #fee2e2; color: #991b1b; border-radius: 10px; padding: 2px 9px; margin: 2px; font-size: 10px; }
   .empty { color: #6b7280; font-size: 12px; font-style: italic; }
 </style>
 </head>
 <body>
-  <h2>Strengths</h2>
-  {% if strengths %}
-    <ul class="strengths">
-      {% for item in strengths %}<li>{{ item }}</li>{% endfor %}
-    </ul>
+  <h1>Skill Validation</h1>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">{{ total_skills }}</div><div class="stat-label">Total Skills</div></div>
+    <div class="stat"><div class="stat-num">{{ validated_count }}</div><div class="stat-label">Validated</div></div>
+    <div class="stat"><div class="stat-num">{{ validation_pct | round(0) }}%</div><div class="stat-label">Validation Rate</div></div>
+  </div>
+
+  <h2>Validated Skills (backed by projects or experience)</h2>
+  {% if validated_skills %}
+    {% for item in validated_skills %}
+    <div class="skill-row">
+      <span class="skill-name">{{ item.skill }}</span> —
+      <span class="skill-projects">{{ item.projects | join(', ') }}</span>
+    </div>
+    {% endfor %}
   {% else %}
-    <p class="empty">Keep improving your resume to unlock strengths.</p>
+    <p class="empty">No skills currently have supporting evidence.</p>
   {% endif %}
 
-  <h2>Critical Issues</h2>
-  {% if critical_issues %}
-    <ul class="critical">
-      {% for item in critical_issues %}<li>{{ item }}</li>{% endfor %}
-    </ul>
+  <h2 style="margin-top:18px;">Unvalidated Skills (no supporting evidence found)</h2>
+  {% if unvalidated_skills %}
+    {% for skill in unvalidated_skills %}<span class="chip">{{ skill }}</span>{% endfor %}
   {% else %}
-    <p class="empty">No critical issues detected.</p>
-  {% endif %}
-
-  <h2>Suggested Improvements</h2>
-  {% if suggestions %}
-    <ul>
-      {% for item in suggestions %}<li>{{ item }}</li>{% endfor %}
-    </ul>
-  {% else %}
-    <p class="empty">No specific improvements flagged at this time.</p>
+    <p class="empty">All listed skills are backed by evidence — nice work.</p>
   {% endif %}
 </body>
 </html>

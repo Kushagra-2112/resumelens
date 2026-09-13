@@ -144,6 +144,9 @@ async def generate_pdf(
     data: AnalysisResponse,
     user_id: str = Depends(get_current_user),
 ):
+    print("DEBUG — received ats_score:", data.ats_score)
+    print("DEBUG — received interpretation:", data.interpretation)
+
     from backend.services.report_generator import generate_html_reports
     from backend.services.pdf_export import generate_combined_pdf
     from fastapi.responses import Response

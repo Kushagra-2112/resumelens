@@ -1,14 +1,26 @@
+import asyncio
 import logging
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 
 from backend.api.auth import get_current_user
-from backend.models.schemas import AnalysisResponse, ComponentScores, JDComparison, SkillValidationDetails
+from backend.models.schemas import (
+    AnalysisResponse,
+    BulkAnalysisResponse,
+    BulkResumeResult,
+    ComponentScores,
+    JDComparison,
+    SkillValidationDetails,
+)
 
 logger = logging.getLogger('ats_resume_scorer')
 
 router = APIRouter(prefix='/api/v1', tags=['Analysis'])
+
+# Concurrency cap — respects Groq API rate limits. Tune based on your Groq
+# tier's requests-per-minute limit.
+BULK_CONCURRENCY_LIMIT = 3
 
 
 @router.post('/analyze-resume', response_model=AnalysisResponse)
@@ -99,6 +111,114 @@ async def analyze_resume(
     return response
 
 
+async def _analyze_one_resume(
+    file: UploadFile,
+    job_description: str,
+    nlp,
+    embedder,
+    semaphore: asyncio.Semaphore,
+):
+    from backend.services.resume_parser import parse_resume_file
+    from backend.services.resume_analyzer import analyze_full_resume
+
+    filename = file.filename or "resume"
+
+    async with semaphore:
+        try:
+            file_bytes = await file.read()
+            resume_text, _ = parse_resume_file(file_bytes, filename)
+
+            # analyze_full_resume is sync/CPU-bound (embeddings, regex, etc.)
+            # — run it in a thread so it doesn't block the event loop while
+            # other resumes in the batch are waiting on their own Groq calls.
+            result = await asyncio.to_thread(
+                analyze_full_resume,
+                resume_text=resume_text,
+                nlp=nlp,
+                embedder=embedder,
+                job_description=job_description,
+            )
+
+            return BulkResumeResult(
+                filename=filename,
+                status="success",
+                ats_score=result["ats_score"],
+                analysis=None,  # full per-resume AnalysisResponse omitted from bulk payload to keep it light; stored in DB instead
+            ), result
+
+        except Exception as exc:
+            logger.error(f"Bulk analysis failed for '{filename}': {exc}")
+            return BulkResumeResult(
+                filename=filename,
+                status="failed",
+                error_message=str(exc),
+            ), None
+
+
+@router.post('/analyze-resumes-bulk', response_model=BulkAnalysisResponse)
+async def analyze_resumes_bulk(
+    request: Request,
+    resumes: List[UploadFile] = File(..., description="Multiple resume files — PDF or DOCX"),
+    job_description: str = Form(..., description="Job description text (required for bulk mode)"),
+    user_id: str = Depends(get_current_user),
+):
+    from backend.database.supabase_db import create_batch_job, save_batch_result, update_batch_counts
+
+    if not resumes:
+        raise HTTPException(status_code=422, detail="At least one resume file is required.")
+    if len(resumes) > 30:
+        raise HTTPException(status_code=422, detail="Maximum 30 resumes per batch.")
+
+    nlp = request.app.state.nlp
+    embedder = request.app.state.embedder
+
+    batch_id = await create_batch_job(user_id, job_description, len(resumes))
+    if batch_id is None:
+        logger.warning("Could not create batch_jobs row — continuing without persistent batch tracking")
+
+    semaphore = asyncio.Semaphore(BULK_CONCURRENCY_LIMIT)
+    tasks = [
+        _analyze_one_resume(file, job_description, nlp, embedder, semaphore)
+        for file in resumes
+    ]
+    outcomes = await asyncio.gather(*tasks)
+
+    results = []
+    completed_count = 0
+    failed_count = 0
+
+    for bulk_result, full_result in outcomes:
+        results.append(bulk_result)
+        if bulk_result.status == "success":
+            completed_count += 1
+        else:
+            failed_count += 1
+
+        if batch_id is not None:
+            await save_batch_result(
+                batch_id=batch_id,
+                filename=bulk_result.filename,
+                status=bulk_result.status,
+                ats_score=bulk_result.ats_score,
+                error_message=bulk_result.error_message,
+                analysis_result=full_result,
+            )
+
+    if batch_id is not None:
+        await update_batch_counts(batch_id, completed_count, failed_count)
+
+    # Rank successful results by score, descending; failed ones go to the end.
+    results.sort(key=lambda r: (r.status != "success", -(r.ats_score or 0)))
+
+    return BulkAnalysisResponse(
+        batch_id=int(batch_id) if batch_id else 0,
+        total_resumes=len(resumes),
+        completed_count=completed_count,
+        failed_count=failed_count,
+        results=results,
+    )
+
+
 @router.get('/health')
 async def health_check(request: Request):
     """Health check — confirms models are loaded and the API is ready."""
@@ -144,9 +264,6 @@ async def generate_pdf(
     data: AnalysisResponse,
     user_id: str = Depends(get_current_user),
 ):
-    print("DEBUG — received ats_score:", data.ats_score)
-    print("DEBUG — received interpretation:", data.interpretation)
-
     from backend.services.report_generator import generate_html_reports
     from backend.services.pdf_export import generate_combined_pdf
     from fastapi.responses import Response

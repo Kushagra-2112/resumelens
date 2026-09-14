@@ -150,3 +150,88 @@ async def delete_analysis(analysis_id: str, user_id: str) -> bool:
     except Exception as exc:
         logger.error(f"Failed to delete analysis {analysis_id}: {exc}")
         return False
+
+async def create_batch_job(user_id: str, job_description: str, total_resumes: int) -> Optional[str]:
+    """Creates a batch_jobs row and returns its id, or None on failure."""
+    headers = _get_headers()
+    if not headers:
+        return None
+
+    doc = {
+        "user_id": user_id,
+        "job_description": job_description,
+        "total_resumes": total_resumes,
+        "completed_count": 0,
+        "failed_count": 0,
+    }
+
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/batch_jobs"
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            response = await client.post(url, headers=headers, json=doc)
+            response.raise_for_status()
+            data = response.json()
+            return str(data[0]["id"]) if data else None
+    except Exception as exc:
+        logger.error(f"Failed to create batch job: {exc}")
+        return None
+
+
+async def save_batch_result(
+    batch_id: str, filename: str, status: str,
+    ats_score: Optional[float] = None,
+    error_message: Optional[str] = None,
+    analysis_result: Optional[Dict] = None,
+) -> None:
+    """Saves one resume's result within a batch. Non-blocking — failures are logged, not raised."""
+    headers = _get_headers()
+    if not headers:
+        return
+
+    def _json_default(o):
+        if hasattr(o, 'model_dump'):
+            return o.model_dump()
+        if hasattr(o, 'item'):
+            return o.item()
+        return str(o)
+
+    serializable_result = (
+        json.loads(json.dumps(analysis_result, default=_json_default))
+        if analysis_result else None
+    )
+
+    doc = {
+        "batch_id": int(batch_id),
+        "filename": filename,
+        "status": status,
+        "ats_score": ats_score,
+        "error_message": error_message,
+        "analysis_result": serializable_result,
+    }
+
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/batch_results"
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            response = await client.post(url, headers=headers, json=doc)
+            response.raise_for_status()
+    except Exception as exc:
+        logger.error(f"Failed to save batch result for '{filename}': {exc}")
+
+
+async def update_batch_counts(batch_id: str, completed_count: int, failed_count: int) -> None:
+    """Updates the running completed/failed counters on a batch_jobs row."""
+    headers = _get_headers()
+    if not headers:
+        return
+
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/batch_jobs"
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            await client.patch(
+                url,
+                headers=headers,
+                params={"id": f"eq.{batch_id}"},
+                json={"completed_count": completed_count, "failed_count": failed_count},
+            )
+    except Exception as exc:
+        logger.error(f"Failed to update batch counts for batch {batch_id}: {exc}")

@@ -2,10 +2,6 @@ import streamlit as st
 import sys
 from pathlib import Path
 
-import os
-st.write("DEBUG — SUPABASE_URL:", os.getenv("SUPABASE_URL"))
-st.write("DEBUG — SUPABASE_ANON_KEY set:", bool(os.getenv("SUPABASE_ANON_KEY")))
-
 # Put the repo root on sys.path so `from frontend.views import ...` resolves
 # regardless of the directory streamlit was launched from.
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -40,7 +36,7 @@ if (
     from frontend.services import supabase_client
     result = supabase_client.exchange_code_for_session(st.query_params["code"])
 
-    #Always clear the ?code= param so a refresh doesn't try to re-exchange.
+    # Always clear the ?code= param so a refresh doesn't try to re-exchange.
     st.query_params.clear()
     if "error" in result:
         st.session_state.auth_error = f"Google sign-in failed: {result['error']}"
@@ -51,7 +47,7 @@ if (
         st.session_state.user_email    = result["email"]
         st.rerun()
 
-#Load custom CSS
+# Load custom CSS
 def load_css():
     try:
         css_path = Path(__file__).parent / 'assets' / 'styles.css'
@@ -69,23 +65,23 @@ if 'current_view' not in st.session_state:
 # Sidebar navigation
 with st.sidebar:
     st.markdown("## Navigation")
-    
+
     if st.button("🏠 Home", use_container_width=True):
         st.session_state.current_view = 'landing'
         st.rerun()
-    
+
     if st.button("🎯 ATS Scorer", use_container_width=True):
         st.session_state.current_view = 'scorer'
         st.rerun()
-    
+
     if st.button("📊 History", use_container_width=True):
         st.session_state.current_view = 'history'
         st.rerun()
-    
+
     if st.button("📚 Resources", use_container_width=True):
         st.session_state.current_view = 'resources'
         st.rerun()
-    
+
     st.markdown("---")
     st.markdown("### 👤 Account")
 
@@ -161,21 +157,17 @@ with st.sidebar:
 
 # Main content area - render based on current view
 if st.session_state.current_view == 'landing':
-    # Import and render landing page
     from frontend.views import landing
     landing.render()
 
 elif st.session_state.current_view == 'scorer':
-    # Import and render scorer page
     from frontend.views import scorer
     scorer.render()
 
 elif st.session_state.current_view == 'history':
-    # Import and render history page
     from frontend.views import history
     history.render()
 
 elif st.session_state.current_view == 'resources':
-    # Import and render resources page
     from frontend.views import resources
     resources.render()

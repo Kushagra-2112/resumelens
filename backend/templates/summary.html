@@ -5,45 +5,55 @@
 <style>
   body { font-family: 'DejaVu Sans', Arial, sans-serif; color: #1f2937; margin: 0; padding: 24px; }
   h1 { color: #4338ca; font-size: 22px; margin-bottom: 4px; }
-  .subtitle { color: #6b7280; font-size: 12px; margin-bottom: 20px; }
-  .score-box { text-align: center; background: #eef2ff; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-  .score-number { font-size: 48px; font-weight: bold; color: #4338ca; }
-  .score-label { font-size: 14px; color: #4b5563; }
-  .interpretation { font-size: 13px; color: #374151; margin-top: 8px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 12px; }
-  th { color: #6b7280; text-transform: uppercase; font-size: 10px; }
-  .bar-bg { background: #e5e7eb; border-radius: 6px; height: 8px; width: 100%; }
-  .bar-fill { background: #4f46e5; border-radius: 6px; height: 8px; }
+  .subtitle { color: #6b7280; font-size: 11px; margin-bottom: 20px; }
+  .score-box { text-align: center; background: #f3f4f6; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .score-number { font-size: 52px; font-weight: bold; }
+  .score-label { font-size: 13px; color: #4b5563; margin-top: 2px; }
+  .interpretation { font-size: 13px; color: #374151; margin-top: 10px; font-style: italic; }
+  h2 { font-size: 15px; color: #374151; margin: 22px 0 10px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 6px 8px; font-size: 12px; vertical-align: middle; }
+  .cat-name { width: 30%; color: #374151; }
+  .cat-score { width: 15%; color: #4b5563; text-align: right; }
+  .bar-cell { width: 55%; }
+  .bar-bg { background: #e5e7eb; border-radius: 6px; height: 10px; width: 100%; }
+  .bar-fill { background: #4f46e5; border-radius: 6px; height: 10px; }
+  ul.strengths { margin: 0; padding-left: 18px; }
+  ul.strengths li { font-size: 12px; color: #065f46; margin-bottom: 5px; line-height: 1.5; }
+  .empty { color: #6b7280; font-size: 12px; font-style: italic; }
 </style>
 </head>
 <body>
   <h1>ATS Resume Analysis Report</h1>
-  <div class="subtitle">Generated for: {{ filename or "your resume" }}</div>
+  <div class="subtitle">Generated {{ timestamp | format_date }}</div>
 
   <div class="score-box">
-    <div class="score-number">{{ ats_score }}</div>
+    <div class="score-number" style="color: {{ score_color }};">{{ overall_score }}</div>
     <div class="score-label">Overall ATS Score / 100</div>
     <div class="interpretation">{{ interpretation }}</div>
   </div>
 
+  <h2>Score Breakdown</h2>
   <table>
-    <thead>
-      <tr><th>Category</th><th>Score</th><th style="width: 40%;">Progress</th></tr>
-    </thead>
-    <tbody>
-      {% for label, value, max_val in component_rows %}
-{% set pct = ((value / max_val * 100) | round | int) if max_val else 0 %}
-<tr>
-  <td>{{ label }}</td>
-  <td>{{ value }} / {{ max_val }}</td>
-  <td>
-    <table class="bar-bg" style="padding: 0; border: none; margin: 0;">
-      <tr>
-        <td class="bar-fill" width="{{ pct }}%" style="padding: 0; border: none;"></td>
-        <td width="{{ 100 - pct }}%" style="padding: 0; border: none;"></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-{% endfor %}
+    {% set labels = {'formatting': ('Formatting', 20), 'keywords': ('Keywords & Skills', 25), 'content': ('Content Quality', 25), 'skill_validation': ('Skill Validation', 15), 'ats_compatibility': ('ATS Compatibility', 15)} %}
+    {% for key, meta in labels.items() %}
+    <tr>
+      <td class="cat-name">{{ meta[0] }}</td>
+      <td class="cat-score">{{ component_scores[key] }} / {{ meta[1] }}</td>
+      <td class="bar-cell">
+        <div class="bar-bg"><div class="bar-fill" style="width: {{ component_pct[key] }}%;"></div></div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Strengths</h2>
+  {% if strengths %}
+    <ul class="strengths">
+      {% for item in strengths %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Keep improving your resume to unlock strengths.</p>
+  {% endif %}
+</body>
+</html>

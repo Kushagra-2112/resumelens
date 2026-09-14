@@ -29,25 +29,43 @@ def _read_jd(jd_file, jd_text: str) -> str:
     return ""
 
 
-def _show_backend_error(exc: Exception) -> None:
+def _show_backend_error(exc: Exception, label: str = "") -> None:
     """Translate a `requests` exception into a friendly Streamlit error."""
+    prefix = f"[{label}] " if label else ""
     if isinstance(exc, requests.ConnectionError):
-        st.error("Could not reach the backend. Is `uvicorn backend.main:app` running on port 8000?")
+        st.error(f"{prefix}Could not reach the backend. Is `uvicorn backend.main:app` running on port 8000?")
     elif isinstance(exc, requests.Timeout):
-        st.error("The backend took too long to respond. Try a smaller resume or check the server logs.")
+        st.error(f"{prefix}The backend took too long to respond. Try a smaller resume or check the server logs.")
     elif isinstance(exc, requests.HTTPError) and exc.response is not None:
         try:
             detail = exc.response.json().get("detail", exc.response.text)
         except ValueError:
             detail = exc.response.text
-        st.error(f"Backend returned {exc.response.status_code}: {detail}")
+        st.error(f"{prefix}Backend returned {exc.response.status_code}: {detail}")
     else:
-        st.error(f"Unexpected error: {exc}")
+        st.error(f"{prefix}Unexpected error: {exc}")
+
+
+def _get_score(analysis: dict) -> float:
+    """Pull the ATS score out of an analysis dict."""
+    try:
+        return float(analysis.get("ats_score", 0))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _display_name(key_suffix: str) -> str:
+    """Strip the leading index prefix ('0_filename.pdf' -> 'filename.pdf') for display."""
+    if "_" in key_suffix:
+        idx, rest = key_suffix.split("_", 1)
+        if idx.isdigit():
+            return rest
+    return key_suffix
 
 
 def _summary_text(analysis: dict) -> str:
-    """Tiny client-side text summary for the Download button."""
-    score = analysis.get("ATS_score", analysis.get("ats_score", 0))
+    """Tiny client-side text summary for a single resume's Download button."""
+    score = _get_score(analysis)
     lines = [f"ATS Score: {score:.0f}/100", ""]
     if analysis.get("strengths"):
         lines.append("STRENGTHS:")
@@ -63,20 +81,78 @@ def _summary_text(analysis: dict) -> str:
     return "\n".join(lines)
 
 
+def _combined_report_text(results: dict, analysis_mode: str, job_description: str = "") -> str:
+    """
+    One consolidated report across every analyzed resume: ranking, the winner,
+    and a per-resume breakdown. This is the single file the user downloads
+    when comparing multiple resumes for one role.
+    """
+    ranked = sorted(results.items(), key=lambda kv: _get_score(kv[1]), reverse=True)
+
+    lines = ["ATS RESUME COMPARISON REPORT", "=" * 40, ""]
+
+    if analysis_mode == "Job Description Comparison" and job_description:
+        snippet = job_description.strip().splitlines()[0][:120]
+        lines.append(f"Job Description (excerpt): {snippet}")
+        lines.append("")
+
+    lines.append(f"Resumes compared: {len(ranked)}")
+    lines.append("")
+    lines.append("RANKING")
+    lines.append("-" * 40)
+    for rank, (key_suffix, analysis) in enumerate(ranked, start=1):
+        lines.append(f"{rank}. {_display_name(key_suffix)} — {_get_score(analysis):.0f}/100")
+    lines.append("")
+
+    top_key, top_analysis = ranked[0]
+    lines.append(f">>> BEST FIT: {_display_name(top_key)} ({_get_score(top_analysis):.0f}/100) <<<")
+    lines.append("")
+
+    if len(ranked) > 1:
+        gap = _get_score(top_analysis) - _get_score(ranked[1][1])
+        if gap < 3:
+            lines.append(
+                f"Note: {_display_name(top_key)} and {_display_name(ranked[1][0])} are close "
+                f"({gap:.0f} point gap) — worth a manual look at both."
+            )
+            lines.append("")
+
+    lines.append("=" * 40)
+    lines.append("DETAILED BREAKDOWN")
+    lines.append("=" * 40)
+    for rank, (key_suffix, analysis) in enumerate(ranked, start=1):
+        lines.append("")
+        lines.append(f"[{rank}] {_display_name(key_suffix)} — Score: {_get_score(analysis):.0f}/100")
+        lines.append("-" * 40)
+        if analysis.get("strengths"):
+            lines.append("Strengths:")
+            lines.extend(f"  - {s}" for s in analysis["strengths"])
+        if analysis.get("critical_issues"):
+            lines.append("Critical Issues:")
+            lines.extend(f"  - {s}" for s in analysis["critical_issues"])
+        if analysis.get("suggestions"):
+            lines.append("Suggestions:")
+            lines.extend(f"  - {s}" for s in analysis["suggestions"])
+
+    return "\n".join(lines)
+
+
 def _render_upload_area(analysis_mode: str):
-    """Two-column upload widgets. Returns (resume_file, jd_file, jd_text)."""
+    """Two-column upload widgets. Returns (resume_files, jd_file, jd_text)."""
     left, right = st.columns(2)
 
     with left:
-        st.markdown("### 📄 Upload Resume")
-        resume_file = st.file_uploader(
-            "Choose your resume file",
+        st.markdown("### 📄 Upload Resume(s)")
+        resume_files = st.file_uploader(
+            "Choose your resume file(s)",
             type=["pdf", "doc", "docx"],
-            help="Supported: PDF, DOC, DOCX (max 5 MB)",
+            help="Supported: PDF, DOC, DOCX (max 5 MB each). Select multiple files to compare against one role.",
             key="resume_upload",
+            accept_multiple_files=True,
         )
-        if resume_file:
-            st.success(f"✅ {resume_file.name} ({resume_file.size / 1024:.1f} KB)")
+        if resume_files:
+            for f in resume_files:
+                st.success(f"✅ {f.name} ({f.size / 1024:.1f} KB)")
 
     jd_file: Optional[object] = None
     jd_text = ""
@@ -111,50 +187,105 @@ def _render_upload_area(analysis_mode: str):
             st.markdown("### 📋 Job Description")
             st.info("Switch to 'Job Description Comparison' mode to enable JD matching.")
 
-    return resume_file, jd_file, jd_text
+    return resume_files, jd_file, jd_text
 
 
-def _render_export_buttons(analysis: dict) -> None:
-    st.markdown("### 📥 Export Results")
+def _render_comparison(results: dict, analysis_mode: str, job_description: str = "") -> None:
+    """
+    Ranked side-by-side comparison across all analyzed resumes, plus a single
+    consolidated download so the user gets one file naming the best fit.
+    Only meaningful with 2+ resumes, so callers should check len(results) > 1.
+    """
+    st.markdown("## 🏆 Comparison")
+    if analysis_mode == "Job Description Comparison":
+        st.caption("Ranked by fit against the job description you provided.")
+    else:
+        st.caption("Ranked by general ATS score.")
+
+    ranked = sorted(results.items(), key=lambda kv: _get_score(kv[1]), reverse=True)
+
+    rows = []
+    for rank, (key_suffix, analysis) in enumerate(ranked, start=1):
+        rows.append(
+            {
+                "Rank": rank,
+                "Resume": _display_name(key_suffix),
+                "Score": round(_get_score(analysis), 1),
+                "Strengths": len(analysis.get("strengths", [])),
+                "Critical Issues": len(analysis.get("critical_issues", [])),
+                "Suggestions": len(analysis.get("suggestions", [])),
+            }
+        )
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+
+    top_key, top_analysis = ranked[0]
+    top_score = _get_score(top_analysis)
+    label = "best match for this job description" if analysis_mode == "Job Description Comparison" else "highest overall ATS score"
+    st.success(f"🥇 **{_display_name(top_key)}** is the {label} — {top_score:.0f}/100.")
+
+    if len(ranked) > 1:
+        second_key, second_analysis = ranked[1]
+        gap = top_score - _get_score(second_analysis)
+        if gap < 3:
+            st.info(
+                f"Note: **{_display_name(top_key)}** and **{_display_name(second_key)}** "
+                f"are close ({gap:.0f} point gap) — worth reviewing both in detail below."
+            )
+
+    # The single consolidated file: ranking + winner + every resume's breakdown.
+    st.download_button(
+        "📥 Download Best-Fit Report (.txt)",
+        data=_combined_report_text(results, analysis_mode, job_description),
+        file_name="ats_best_fit_report.txt",
+        mime="text/plain",
+        use_container_width=True,
+        type="primary",
+        key="download_combined_report",
+    )
+
+    st.markdown("---")
+
+
+def _render_export_buttons(analysis: dict, key_suffix: str) -> None:
+    st.markdown("##### 📥 Export this resume")
     c1, c2 = st.columns(2)
 
     with c1:
-        # Lazy: only call the backend the first time the user clicks expand.
-        if st.button("📑 Generate PDF Report", use_container_width=True, type="primary"):
+        if st.button("📑 Generate PDF Report", use_container_width=True, key=f"gen_pdf_{key_suffix}"):
             try:
                 with st.spinner("Generating PDF on backend..."):
                     pdf_bytes = api_client.generate_pdf(
                         analysis,
                         access_token=st.session_state["access_token"],
                     )
-                st.session_state["scorer_pdf_bytes"] = pdf_bytes
+                st.session_state[f"scorer_pdf_bytes_{key_suffix}"] = pdf_bytes
             except requests.RequestException as exc:
-                _show_backend_error(exc)
+                _show_backend_error(exc, label=key_suffix)
 
-        if "scorer_pdf_bytes" in st.session_state:
+        if f"scorer_pdf_bytes_{key_suffix}" in st.session_state:
             st.download_button(
                 "⬇️ Download PDF",
-                data=st.session_state["scorer_pdf_bytes"],
-                file_name="ats_resume_report.pdf",
+                data=st.session_state[f"scorer_pdf_bytes_{key_suffix}"],
+                file_name=f"ats_resume_report_{key_suffix}.pdf",
                 mime="application/pdf",
                 use_container_width=True,
-                key="download_pdf_report",
+                key=f"download_pdf_report_{key_suffix}",
             )
 
     with c2:
         st.download_button(
             "📄 Download Summary (.txt)",
             data=_summary_text(analysis),
-            file_name="ats_summary.txt",
+            file_name=f"ats_summary_{key_suffix}.txt",
             mime="text/plain",
             use_container_width=True,
-            key="download_summary",
+            key=f"download_summary_{key_suffix}",
         )
 
 
 def render() -> None:
     st.title("🎯 ATS Resume Scorer")
-    st.markdown("Upload your resume — and optionally a job description — for a comprehensive analysis.")
+    st.markdown("Upload one or more resumes — and optionally a job description — for a comprehensive analysis.")
 
     with st.sidebar:
         st.markdown("---")
@@ -174,15 +305,21 @@ def render() -> None:
 
     st.markdown("---")
 
-    resume_file, jd_file, jd_text = _render_upload_area(analysis_mode)
+    resume_files, jd_file, jd_text = _render_upload_area(analysis_mode)
 
     st.markdown("---")
 
-    if not resume_file:
-        st.info("👆 Upload your resume to begin.")
-        # If we have a prior result in session, render it again.
-        if st.session_state.get("scorer_analysis"):
-            display_results_dashboard(st.session_state["scorer_analysis"])
+    if not resume_files:
+        st.info("👆 Upload one or more resumes to begin.")
+        if st.session_state.get("scorer_analyses"):
+            results = st.session_state["scorer_analyses"]
+            mode = st.session_state.get("scorer_mode", analysis_mode)
+            jd = st.session_state.get("scorer_jd", "")
+            if len(results) > 1:
+                _render_comparison(results, mode, jd)
+            for key_suffix, analysis in results.items():
+                st.markdown(f"#### Results: {_display_name(key_suffix)}")
+                display_results_dashboard(analysis)
         return
 
     access_token = st.session_state.get("access_token")
@@ -190,35 +327,68 @@ def render() -> None:
         st.warning("⚠️ Sign in from the sidebar to analyze a resume.")
         return
 
+    st.caption(f"{len(resume_files)} resume(s) ready for analysis.")
+
     _, mid, _ = st.columns([1, 2, 1])
     with mid:
-        analyze = st.button("🚀 Analyze Resume", use_container_width=True, type="primary")
+        analyze = st.button("🚀 Analyze Resume(s)", use_container_width=True, type="primary")
 
     if not analyze:
-        # Re-show previous result on rerun (e.g. after PDF generation).
-        if st.session_state.get("scorer_analysis"):
-            display_results_dashboard(st.session_state["scorer_analysis"])
-            _render_export_buttons(st.session_state["scorer_analysis"])
+        # Re-show previous results on rerun (e.g. after downloading the report).
+        if st.session_state.get("scorer_analyses"):
+            results = st.session_state["scorer_analyses"]
+            mode = st.session_state.get("scorer_mode", analysis_mode)
+            jd = st.session_state.get("scorer_jd", "")
+            if len(results) > 1:
+                _render_comparison(results, mode, jd)
+            for key_suffix, analysis in results.items():
+                with st.expander(f"📄 {_display_name(key_suffix)}", expanded=len(results) == 1):
+                    display_results_dashboard(analysis)
+                    _render_export_buttons(analysis, key_suffix)
         return
 
-    # Fresh analysis — drop any cached PDF/result.
-    st.session_state.pop("scorer_pdf_bytes", None)
-    st.session_state.pop("scorer_analysis", None)
+    # Fresh analysis — drop any cached PDFs/results.
+    for k in list(st.session_state.keys()):
+        if k.startswith("scorer_pdf_bytes_") or k in ("scorer_analyses", "scorer_mode", "scorer_jd"):
+            del st.session_state[k]
 
     job_description = _read_jd(jd_file, jd_text) if analysis_mode == "Job Description Comparison" else ""
 
-    try:
-        with st.spinner("Analyzing your resume... this can take 10–30 seconds."):
+    results: dict = {}
+    progress = st.progress(0.0, text="Starting analysis...")
+
+    for i, resume_file in enumerate(resume_files):
+        key_suffix = f"{i}_{resume_file.name}"
+        progress.progress(
+            i / len(resume_files),
+            text=f"Analyzing {resume_file.name} ({i + 1}/{len(resume_files)})...",
+        )
+        try:
             analysis = api_client.analyze_resume(
                 resume_file=resume_file,
                 access_token=access_token,
                 job_description=job_description,
             )
-    except requests.RequestException as exc:
-        _show_backend_error(exc)
+            results[key_suffix] = analysis
+        except requests.RequestException as exc:
+            _show_backend_error(exc, label=resume_file.name)
+
+    progress.progress(1.0, text="Done!")
+    progress.empty()
+
+    if not results:
+        st.error("No resumes were analyzed successfully — see errors above.")
         return
 
-    st.session_state["scorer_analysis"] = analysis
-    st.success("✅ Analysis complete!")
-    display_results_dashboard(analysis)
-    _render_export_buttons(analysis)
+    st.session_state["scorer_analyses"] = results
+    st.session_state["scorer_mode"] = analysis_mode
+    st.session_state["scorer_jd"] = job_description
+    st.success(f"✅ Analysis complete for {len(results)}/{len(resume_files)} resume(s)!")
+
+    if len(results) > 1:
+        _render_comparison(results, analysis_mode, job_description)
+
+    for key_suffix, analysis in results.items():
+        with st.expander(f"📄 {_display_name(key_suffix)}", expanded=len(results) == 1):
+            display_results_dashboard(analysis)
+            _render_export_buttons(analysis, key_suffix)

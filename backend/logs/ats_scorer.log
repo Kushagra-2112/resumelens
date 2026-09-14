@@ -252,3 +252,154 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/St
 2026-09-13 16:01:55,504 - INFO - Groq parsed experience count: 2
 2026-09-13 16:02:07,419 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 3
 2026-09-13 16:02:32,379 - INFO - Generated combined PDF (16111 bytes) from 4 sections
+2026-09-13 18:32:40,741 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-13 18:32:47,140 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-13 18:32:47,143 - INFO - Groq parsed skills count: 30
+2026-09-13 18:32:47,144 - INFO - Groq parsed experience count: 2
+2026-09-13 18:33:00,368 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 4
+2026-09-13 18:33:11,862 - INFO - Generated combined PDF (15713 bytes) from 4 sections
+2026-09-13 18:41:30,542 - INFO - Shutting down the API...
+2026-09-13 18:43:49,263 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-13 18:43:49,263 - INFO - Groq parsed skills count: 29
+2026-09-13 18:43:49,263 - INFO - Groq parsed experience count: 2
+2026-09-13 18:44:03,160 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 5
+2026-09-13 18:44:50,412 - ERROR - Template is missing a <body>/</body> tag — likely truncated. Falling back to the raw content, which may render incorrectly.
+2026-09-13 18:44:51,529 - INFO - Generated combined PDF (15762 bytes) from 4 sections
+2026-09-13 18:45:17,019 - INFO - Shutting down the API...
+2026-09-13 18:49:19,921 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-13 18:49:19,921 - INFO - Groq parsed skills count: 35
+2026-09-13 18:49:19,922 - INFO - Groq parsed experience count: 2
+2026-09-13 18:49:38,065 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 6
+2026-09-13 18:49:53,673 - INFO - Generated combined PDF (16354 bytes) from 4 sections
+2026-09-13 18:54:18,603 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-13 18:54:25,543 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-13 18:54:25,543 - INFO - Groq parsed skills count: 34
+2026-09-13 18:54:25,544 - INFO - Groq parsed experience count: 2
+2026-09-13 18:54:42,116 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 7
+2026-09-13 18:54:52,123 - INFO - Generated combined PDF (16517 bytes) from 4 sections
+2026-09-13 19:19:31,414 - INFO - Shutting down the API...
+2026-09-14 08:03:13,077 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 08:03:13,082 - INFO - Groq parsed skills count: 32
+2026-09-14 08:03:13,083 - INFO - Groq parsed experience count: 2
+2026-09-14 08:03:28,575 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 8
+2026-09-14 08:03:40,820 - INFO - Generated combined PDF (16551 bytes) from 4 sections
+2026-09-14 08:11:21,974 - INFO - Shutting down the API...
+2026-09-14 08:17:52,491 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:17:52,492 - INFO - Groq parsed skills count: 28
+2026-09-14 08:17:52,493 - INFO - Groq parsed experience count: 2
+2026-09-14 08:18:09,897 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 08:18:41,445 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:18:41,446 - INFO - Groq parsed skills count: 27
+2026-09-14 08:18:41,446 - INFO - Groq parsed experience count: 2
+2026-09-14 08:18:56,836 - ERROR - Failed to save analysis to Supabase: 
+2026-09-14 08:19:12,243 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 08:19:35,493 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:19:35,493 - INFO - Groq parsed skills count: 28
+2026-09-14 08:19:35,494 - INFO - Groq parsed experience count: 2
+2026-09-14 08:19:51,936 - ERROR - Failed to save analysis to Supabase: 
+2026-09-14 08:19:53,676 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 9
+2026-09-14 08:20:06,336 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 08:20:36,030 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 08:20:36,031 - INFO - Groq parsed skills count: 34
+2026-09-14 08:20:36,031 - INFO - Groq parsed experience count: 2
+2026-09-14 08:20:53,025 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 10
+2026-09-14 08:24:00,096 - INFO - Shutting down the API...
+2026-09-14 08:26:16,338 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:26:16,339 - INFO - Groq parsed skills count: 29
+2026-09-14 08:26:16,340 - INFO - Groq parsed experience count: 2
+2026-09-14 08:26:26,652 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 11
+2026-09-14 08:26:35,172 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 08:26:54,610 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 08:26:54,611 - INFO - Groq parsed skills count: 29
+2026-09-14 08:26:54,612 - INFO - Groq parsed experience count: 2
+2026-09-14 08:27:06,502 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 12
+2026-09-14 08:27:24,517 - INFO - Generated combined PDF (16186 bytes) from 4 sections
+2026-09-14 08:28:19,847 - INFO - Shutting down the API...
+2026-09-14 08:30:30,752 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:30:30,753 - INFO - Groq parsed skills count: 31
+2026-09-14 08:30:30,753 - INFO - Groq parsed experience count: 2
+2026-09-14 08:30:42,968 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 13
+2026-09-14 08:32:13,046 - INFO - Shutting down the API...
+2026-09-14 08:33:51,365 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:33:51,366 - INFO - Groq parsed skills count: 42
+2026-09-14 08:33:51,366 - INFO - Groq parsed experience count: 2
+2026-09-14 08:34:08,707 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 14
+2026-09-14 08:34:34,351 - INFO - Generated combined PDF (16662 bytes) from 4 sections
+2026-09-14 08:36:12,890 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 08:36:19,148 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:36:19,148 - INFO - Groq parsed skills count: 29
+2026-09-14 08:36:19,149 - INFO - Groq parsed experience count: 2
+2026-09-14 08:36:32,860 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 15
+2026-09-14 08:36:45,260 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 08:37:12,512 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 08:37:12,513 - INFO - Groq parsed skills count: 29
+2026-09-14 08:37:12,513 - INFO - Groq parsed experience count: 2
+2026-09-14 08:37:33,158 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 16
+2026-09-14 08:41:23,262 - INFO - Shutting down the API...
+2026-09-14 08:45:41,075 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:45:41,078 - INFO - Groq parsed skills count: 30
+2026-09-14 08:45:41,079 - INFO - Groq parsed experience count: 2
+2026-09-14 08:45:53,818 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 17
+2026-09-14 08:46:02,783 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 08:46:21,274 - ERROR - Full analysis pipeline failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m09nanwpemd9ct2mknjeg0d5` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 4286, Requested 3844. Please try again in 975ms. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+2026-09-14 08:49:53,255 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 08:50:00,499 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:50:00,499 - INFO - Groq parsed skills count: 29
+2026-09-14 08:50:00,500 - INFO - Groq parsed experience count: 2
+2026-09-14 08:50:27,570 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 18
+2026-09-14 08:50:38,064 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 08:50:47,068 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 08:50:47,070 - INFO - Groq parsed skills count: 34
+2026-09-14 08:50:47,070 - INFO - Groq parsed experience count: 2
+2026-09-14 08:51:07,651 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 19
+2026-09-14 08:52:02,368 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 08:52:09,469 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 08:52:09,470 - INFO - Groq parsed skills count: 32
+2026-09-14 08:52:09,470 - INFO - Groq parsed experience count: 2
+2026-09-14 08:52:28,186 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 20
+2026-09-14 08:52:37,512 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 08:52:57,963 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 08:52:57,963 - INFO - Groq parsed skills count: 31
+2026-09-14 08:52:57,963 - INFO - Groq parsed experience count: 2
+2026-09-14 08:53:11,387 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 21
+2026-09-14 08:57:20,994 - INFO - Shutting down the API...
+2026-09-14 09:00:10,181 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 09:00:10,182 - INFO - Groq parsed skills count: 28
+2026-09-14 09:00:10,184 - INFO - Groq parsed experience count: 2
+2026-09-14 09:00:21,156 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 22
+2026-09-14 09:00:30,965 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 09:00:40,138 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 09:00:40,139 - INFO - Groq parsed skills count: 30
+2026-09-14 09:00:40,139 - INFO - Groq parsed experience count: 2
+2026-09-14 09:01:06,613 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 23
+2026-09-14 17:46:28,980 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 17:46:36,264 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 17:46:36,264 - INFO - Groq parsed skills count: 30
+2026-09-14 17:46:36,265 - INFO - Groq parsed experience count: 2
+2026-09-14 17:46:56,898 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 17:47:05,088 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 17:47:05,091 - INFO - Groq parsed skills count: 29
+2026-09-14 17:47:05,095 - INFO - Groq parsed experience count: 2
+2026-09-14 17:47:29,032 - ERROR - Failed to save analysis to Supabase: 
+2026-09-14 17:47:31,397 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 24
+2026-09-14 17:47:42,984 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 17:48:12,271 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 17:48:12,272 - INFO - Groq parsed skills count: 30
+2026-09-14 17:48:12,272 - INFO - Groq parsed experience count: 2
+2026-09-14 17:48:31,026 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 25
+2026-09-14 17:50:34,543 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 17:50:42,804 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 17:50:42,806 - INFO - Groq parsed skills count: 28
+2026-09-14 17:50:42,807 - INFO - Groq parsed experience count: 2
+2026-09-14 17:51:03,632 - INFO - Parsed 'Kushagra_Sharma_ProjectManagement_Intern_Resume.pdf': 3323 chars extracted
+2026-09-14 17:51:33,566 - INFO - Groq parsed summary: 'B.Tech (CS, AI/ML) undergraduate with a strong technical foundation and proven experience planning, '
+2026-09-14 17:51:33,568 - INFO - Groq parsed skills count: 36
+2026-09-14 17:51:33,571 - INFO - Groq parsed experience count: 2
+2026-09-14 17:51:50,993 - ERROR - Failed to save analysis to Supabase: 
+2026-09-14 17:51:56,128 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 26
+2026-09-14 17:52:05,412 - INFO - Parsed 'Kushagra_Sharma_DataAnalyst_Intern_Resume.pdf': 3112 chars extracted
+2026-09-14 17:52:24,674 - INFO - Groq parsed summary: 'AI/ML Engineering undergraduate with hands-on experience in data cleaning, exploratory data analysis'
+2026-09-14 17:52:24,675 - INFO - Groq parsed skills count: 29
+2026-09-14 17:52:24,675 - INFO - Groq parsed experience count: 2
+2026-09-14 17:52:44,537 - INFO - Saved analysis for user 4b424801-d792-4e1c-857a-a11c8637e91c: 27
+2026-09-14 17:58:05,143 - INFO - Shutting down the API...

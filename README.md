@@ -1,305 +1,266 @@
-# AI-Driven Resume Screening System for Recruitment
+# ResumeLens
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688)](https://fastapi.tiangolo.com/)
-[![Streamlit](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B)](https://streamlit.io/)
-[![Supabase](https://img.shields.io/badge/Auth%20%26%20DB-Supabase-3FCF8E)](https://supabase.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+![Python](https://img.shields.io/badge/Python-3.10%2B-2E7D32?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-2E7D32?style=flat-square)
+![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-2E7D32?style=flat-square)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20DB-2E7D32?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-2E7D32?style=flat-square)
 
-An AI-powered resume screening platform that replaces rigid ATS keyword matching with semantic similarity, explicit skill validation, and a transparent, decomposed scoring engine.
-
-Instead of returning a single opaque match percentage, the system scores every resume out of 100 across five interpretable components (formatting, keyword relevance, content quality, skill validation, ATS compatibility) that sum arithmetically to the final score, and pairs it with severity-ranked, actionable feedback.
+An AI-powered resume screening system that scores resumes against a job description using semantic matching, validates that claimed skills are actually backed up by evidence, and generates specific, prioritized feedback — for both individual job seekers and recruiters screening resumes in bulk.
 
 ---
 
-## Table of Contents
+## Why
 
-- [Why This Project](#why-this-project)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-  - [Running the App](#running-the-app)
-- [API Overview](#api-overview)
-- [Scoring Methodology](#scoring-methodology)
-- [Results](#results)
-- [Limitations](#limitations)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [Authors](#authors)
-- [License](#license)
-
----
-
-## Why This Project
-
-Conventional Applicant Tracking Systems filter resumes by exact keyword overlap. This causes two well-documented failure modes:
-
-- **False negatives** — a resume that says "developed REST APIs" gets rejected against a job description asking for "building backend web services," even though they describe the same skill.
-- **False positives** — a candidate who lists a technology once in a skills section, with no supporting project or experience, matches just as strongly as someone who has used it for years.
-
-This system addresses both by scoring meaning instead of words, and by verifying that every claimed skill is backed by evidence elsewhere in the resume.
+Traditional ATS tools reject qualified candidates when a resume uses different wording than the job description ("developed REST APIs" vs. "backend web services"), and shortlist unqualified ones who simply list the right keywords without ever demonstrating them. ResumeLens replaces exact keyword matching with semantic comparison, and adds a skill-validation layer that checks whether a claimed skill is actually mentioned anywhere in a project or experience entry — not just listed once in a skills section.
 
 ## Features
 
-- **Multi-format parsing** — PDF, DOC, DOCX, validated by magic-byte inspection rather than file extension.
-- **LLM-based structured extraction** — contact info, summary, skills, education, projects, and experience parsed via an LLM (Groq / Llama 3), with JSON-schema validation and automatic retry on malformed output.
-- **Semantic matching** — Sentence-BERT (`all-mpnet-base-v2`) embeddings and spaCy NER, compared via cosine similarity instead of keyword overlap.
-- **Skill validation engine** — every claimed skill is checked against project/experience text (fast substring check first, semantic similarity fallback) to catch keyword stuffing.
-- **Transparent, additive scoring (out of 100)** — five weighted components sum directly to the final score, so results are independently verifiable.
-- **AI-generated feedback** — severity-ranked, actionable suggestions across ten issue categories, each with a rewritten example.
-- **Bulk / recruiter mode** — upload multiple resumes against one job description; concurrency-capped, per-file fault-isolated batch scoring with a ranked shortlist.
-- **Authentication and persistence** — Supabase Auth (JWT) with PostgreSQL storage of past analyses.
-- **Downloadable reports** — HTML-to-PDF report generation via Jinja2 and WeasyPrint.
+**For candidates**
+- Upload a resume (PDF / DOC / DOCX) and get a transparent ATS score out of 100, broken into five weighted categories that sum to the total — no opaque single number
+- Skill validation — flags skills that are listed but never substantiated elsewhere in the resume
+- Optional job description comparison — semantic similarity, matched/missing keywords, skill gap analysis
+- Severity-ranked, actionable feedback with rewritten examples, not just a list of problems
+- Downloadable multi-section PDF report
+- Saved analysis history, accessible after signing in
 
-## Architecture
+**For recruiters**
+- Upload multiple resumes against one job description in a single batch
+- Resumes are scored concurrently (rate-limit aware) using the exact same scoring engine as the single-resume flow — no duplicated logic
+- Results returned as a ranked list, sorted by score
+- A single corrupted or unreadable file is isolated and reported without failing the rest of the batch
+- Batch history persisted for later review
 
-```
-                     ┌─────────────────────────┐
-   Resume + JD ────▶ │   Streamlit Frontend     │
-                     │ (login, upload, results) │
-                     └────────────┬────────────┘
-                                  │ JWT
-                     ┌────────────▼────────────┐
-                     │      Supabase Auth       │
-                     └────────────┬────────────┘
-                                  │
-                     ┌────────────▼────────────┐
-                     │      FastAPI Backend      │
-                     └──┬─────────┬─────────┬───┘
-                        │         │         │
-              ┌─────────▼──┐ ┌────▼─────┐ ┌─▼───────────────┐
-              │   Text     │ │   LLM    │ │  NLP Embeddings  │
-              │ Extraction │ │ Parsing  │ │ (spaCy + SBERT)  │
-              │(pdfplumber)│ │ (Groq)   │ │                  │
-              └─────────┬──┘ └────┬─────┘ └─┬────────────────┘
-                        └─────────┼──────────┘
-                             ┌────▼─────┐
-                             │  Scoring  │
-                             │  Engine   │
-                             │ (ATS/100) │
-                             └──┬─────┬──┘
-                     ┌──────────▼──┐ ┌▼───────────────┐
-                     │ Supabase DB │ │ PDF Generation  │
-                     │ (persist)   │ │  (WeasyPrint)   │
-                     └──────────┬──┘ └┬────────────────┘
-                                └──┬──┘
-                          ┌────────▼────────┐
-                          │ Results shown in │
-                          │    frontend      │
-                          └──────────────────┘
-```
-
-### Nine-Stage Processing Pipeline
-
-1. Upload resume and job description
-2. Extract raw text (`pdfplumber` / `python-docx`)
-3. Validate file type and integrity — reject with HTTP 422/400 if invalid
-4. LLM-based structured parsing (Groq API)
-5. Entity detection (spaCy NER + Sentence-BERT embeddings)
-6. Skill validation (keyword and semantic match vs. job description)
-7. Weighted scoring engine — produces ATS score out of 100
-8. LLM feedback generation (prioritized, actionable suggestions)
-9. Persist to database and return response (JSON or downloadable PDF)
-
-### Bulk Screening Flow
-
-The same single-resume pipeline is reused as a subroutine, so no logic is duplicated:
-
-```
-Recruiter uploads N resumes + 1 job description
-        |
-        v
-Create batch job record
-        |
-        v
-Concurrency-capped dispatch (semaphore, 3 at a time)
-        |
-        v
-Each resume scored independently; failures isolated
-        |
-        v
-Aggregate results, rank by score, persist, return shortlist
-```
+**Platform**
+- Email/password and Google OAuth authentication via Supabase
+- Stateless JWT verification on the backend (HS256, no database round-trip per request)
 
 ## Tech Stack
 
-| Layer | Technology | Role |
+| Layer            | Technology |
+|------------------|------------|
+| Frontend         | Streamlit |
+| Backend          | FastAPI, Uvicorn, Pydantic |
+| NLP / Matching   | spaCy (`en_core_web_md`), Sentence Transformers (`all-MiniLM-L6-v2`), RapidFuzz |
+| File Parsing     | pdfplumber, PyPDF2, python-docx, python-magic |
+| LLM              | Groq API (Llama 3) — structured parsing and feedback generation |
+| Auth             | Supabase Auth, PyJWT (HS256, verified against the Supabase JWT secret) |
+| Database         | Supabase (PostgreSQL), accessed via httpx |
+| Reporting        | Jinja2 + WeasyPrint |
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[Resume: PDF / DOC / DOCX] --> C[Streamlit Frontend]
+    B[Job Description: optional] --> C
+    C --> D[Supabase Auth - issues JWT]
+    D --> E[FastAPI Backend - verifies JWT HS256]
+    E --> F[Text Extraction - pdfplumber]
+    F --> G[LLM Parsing - Groq]
+    G --> H[NLP Embeddings - spaCy + SBERT]
+    H --> I[Skill Validation]
+    I --> J[Weighted Scoring Engine - /100]
+    J --> K[LLM Feedback Generation]
+    K --> L[Supabase DB]
+    K --> M[PDF Report - WeasyPrint]
+
+    classDef light fill:#E8F5E9,stroke:#1B5E20,color:#0F3D12;
+    classDef mid fill:#C8E6C9,stroke:#1B5E20,color:#0F3D12;
+    classDef deep fill:#A5D6A7,stroke:#1B5E20,color:#0F3D12;
+    class A,B,L,M light;
+    class C,D,E mid;
+    class F,G,H,I,J,K deep;
+```
+
+### Single-resume pipeline
+
+```mermaid
+flowchart TD
+    A[Upload resume + optional job description] --> B[Extract raw text - pdfplumber]
+    B --> C{File valid?}
+    C -- No --> C1[Reject - HTTP 422]
+    C -- Yes --> D[LLM structured parsing - Groq]
+    D --> E[spaCy NER + Sentence-BERT embeddings]
+    E --> F[Skill validation - substring + semantic match]
+    F --> G[Weighted scoring engine - five categories sum to 100]
+    G --> H[LLM feedback - severity-ranked, actionable]
+    H --> I[Save to database]
+    H --> J[Return JSON or PDF]
+
+    classDef light fill:#E8F5E9,stroke:#1B5E20,color:#0F3D12;
+    classDef mid fill:#C8E6C9,stroke:#1B5E20,color:#0F3D12;
+    classDef deep fill:#A5D6A7,stroke:#1B5E20,color:#0F3D12;
+    classDef bad fill:#FFCDD2,stroke:#B71C1C,color:#7A0000;
+    class A,I,J light;
+    class B,G,H mid;
+    class D,E,F deep;
+    class C1 bad;
+```
+
+### Bulk / recruiter mode
+
+```mermaid
+flowchart TD
+    A[Recruiter uploads N resumes + one job description] --> B[Create batch job record]
+    B --> C[Concurrency-capped dispatch - semaphore]
+    C --> D1[Resume 1 - scoring pipeline]
+    C --> D2[Resume 2 - scoring pipeline]
+    C --> D3[Resume N - scoring pipeline]
+    D1 --> E[Aggregate results, isolate failures]
+    D2 --> E
+    D3 --> E
+    E --> F[Rank by ATS score]
+    F --> G[Persist batch results]
+
+    classDef light fill:#E8F5E9,stroke:#1B5E20,color:#0F3D12;
+    classDef deep fill:#A5D6A7,stroke:#1B5E20,color:#0F3D12;
+    class A,G light;
+    class B,C,D1,D2,D3,E,F deep;
+```
+
+## Scoring Methodology
+
+The overall ATS score is a direct sum of five weighted categories — nothing is hidden in a re-weighted formula, so the reported total can be verified by adding the components yourself:
+
+| Component | Max | Measures |
 |---|---|---|
-| Frontend | Streamlit | Upload UI, results dashboard, auth forms |
-| Backend | FastAPI, Uvicorn, Pydantic | REST API, request/response validation |
-| Document Parsing | pdfplumber, PyPDF2, python-docx, python-magic | Text extraction and true file-type detection |
-| NLP and Matching | spaCy (`en_core_web_md`), Sentence Transformers, RapidFuzz | Entity recognition, semantic embeddings, fuzzy matching |
-| Language Model | Groq API (Llama 3) | Structured parsing and feedback generation |
-| Auth | Supabase Auth, PyJWT | Token issuance and stateless verification |
-| Database | Supabase (PostgreSQL), httpx | Persistent storage of analyses and batch results |
-| Reporting | Jinja2, WeasyPrint | HTML templating and PDF report generation |
+| Formatting | 20 | Section structure, bullet usage, summary length |
+| Keyword relevance | 25 | Semantic coverage of job-description terms |
+| Content quality | 25 | Action verbs, quantified achievements |
+| Skill validation | 15 | Proportion of claimed skills backed by evidence |
+| ATS compatibility | 15 | Parseability, absence of layout constructs automated readers can't handle |
 
-## Project Structure
-
-Adjust to match your actual repository layout — this reflects the architecture above.
-
-```
-resume-screening-system/
-├── backend/
-│   ├── app/
-│   │   ├── main.py                 # FastAPI app entrypoint
-│   │   ├── api/                    # Route definitions (analyze, batch, auth)
-│   │   ├── core/                   # Config, settings, security
-│   │   ├── parsing/                # pdfplumber / python-docx extraction
-│   │   ├── llm/                    # Groq API client, prompt templates
-│   │   ├── nlp/                    # spaCy NER + Sentence-BERT embeddings
-│   │   ├── scoring/                # Weighted scoring engine
-│   │   ├── feedback/               # Issue detection & suggestion generation
-│   │   ├── batch/                  # Bulk screening / concurrency dispatch
-│   │   ├── reports/                # Jinja2 templates + WeasyPrint PDF export
-│   │   └── db/                     # Supabase/Postgres models & queries
-│   ├── requirements.txt
-│   └── tests/
-├── frontend/
-│   ├── streamlit_app.py            # Streamlit entrypoint
-│   └── pages/                      # Upload, results, batch dashboard
-├── docs/
-│   └── thesis/                     # Project thesis & diagrams
-├── .env.example
-├── LICENSE
-└── README.md
-```
+Small bonuses apply for strong skill validation and error-free grammar; a graduated penalty applies when a large proportion of job-description keywords are missing.
 
 ## Getting Started
 
 ### Prerequisites
-
 - Python 3.10+
-- A [Supabase](https://supabase.com/) project (Auth + PostgreSQL)
-- A [Groq API](https://console.groq.com/) key (LLM parsing and feedback)
-- `pip` and a virtual environment tool (`venv`, `conda`, etc.)
+- A [Supabase](https://supabase.com) project
+- A [Groq](https://groq.com) API key
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-username>/resume-screening-system.git
-cd resume-screening-system
+git clone https://github.com/Kushagra-2112/resumelens.git
+cd resumelens
 
-# Backend setup
-cd backend
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\Activate.ps1
+
 pip install -r requirements.txt
 python -m spacy download en_core_web_md
-
-# Frontend setup
-cd ../frontend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
 ```
 
-### Environment Variables
+### Configuration
 
-Create a `.env` file in `backend/` (see `.env.example`):
+Create a `.env` file in the project root:
 
 ```env
-# Groq (LLM parsing & feedback generation)
-GROQ_API_KEY=your_groq_api_key
-
-# Supabase (auth + database)
-SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_service_role_key
 SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# JWT
-JWT_SECRET=your_jwt_secret
-
-# App config
-MAX_UPLOAD_SIZE_MB=10
-BULK_CONCURRENCY_LIMIT=3
+GROQ_API_KEY=your_groq_api_key
+AUTH_REDIRECT_URL=http://localhost:8501
 ```
 
-### Running the App
+### Database setup
+
+Run the following in Supabase's SQL Editor:
+
+```sql
+create table public.analyses (
+  id                bigint generated by default as identity primary key,
+  user_id           uuid not null references auth.users(id) on delete cascade,
+  filename          text not null,
+  ats_score         numeric,
+  keyword_match     numeric,
+  missing_keywords  jsonb default '[]'::jsonb,
+  analysis_result   jsonb not null,
+  created_at        timestamptz default now()
+);
+
+create table public.batch_jobs (
+  id                bigint generated by default as identity primary key,
+  user_id           uuid not null references auth.users(id) on delete cascade,
+  job_description   text not null,
+  total_resumes     int not null default 0,
+  completed_count   int not null default 0,
+  failed_count      int not null default 0,
+  created_at        timestamptz default now()
+);
+
+create table public.batch_results (
+  id                bigint generated by default as identity primary key,
+  batch_id          bigint not null references public.batch_jobs(id) on delete cascade,
+  filename          text not null,
+  ats_score         numeric,
+  status            text not null default 'success',
+  error_message     text,
+  analysis_result   jsonb,
+  created_at        timestamptz default now()
+);
+
+alter table public.analyses enable row level security;
+alter table public.batch_jobs enable row level security;
+alter table public.batch_results enable row level security;
+
+create policy "Users manage their own analyses" on public.analyses for all using (auth.uid() = user_id);
+create policy "Users manage their own batch jobs" on public.batch_jobs for all using (auth.uid() = user_id);
+create policy "Users view results of their own batches" on public.batch_results for all
+  using (batch_id in (select id from public.batch_jobs where user_id = auth.uid()));
+```
+
+### Running the app
 
 ```bash
-# Terminal 1 — backend (from /backend)
-uvicorn app.main:app --reload --port 8000
+# Backend
+uvicorn backend.main:app --reload
 
-# Terminal 2 — frontend (from /frontend)
+# Frontend (separate terminal)
+cd frontend
 streamlit run streamlit_app.py
 ```
 
-| Service | URL |
-|---|---|
-| Streamlit UI | `http://localhost:8501` |
-| FastAPI Swagger docs | `http://localhost:8000/docs` |
+App runs at `http://localhost:8501`, API at `http://localhost:8000` (interactive docs at `/docs`).
 
-## API Overview
+## Project Structure
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/auth/login` | POST | Authenticate and issue a JWT |
-| `/analyze` | POST | Upload a single resume (+ optional JD) and get a scored analysis |
-| `/analyze/{id}/report` | GET | Download the PDF report for a past analysis |
-| `/batch/analyze` | POST | Upload multiple resumes + one JD for bulk screening |
-| `/batch/{batch_id}` | GET | Retrieve ranked results for a batch job |
-| `/history` | GET | List a user's past analyses |
+```
+resumelens/
+├── backend/
+│   ├── api/               # Routes, auth dependency
+│   ├── core/               # Config, environment loading
+│   ├── database/           # Supabase client and queries
+│   ├── models/              # Pydantic schemas
+│   ├── services/            # Parsing, scoring, feedback, PDF generation
+│   ├── templates/           # Jinja2 HTML templates for PDF reports
+│   ├── utils/               # File and matching utilities
+│   └── main.py
+├── frontend/
+│   ├── components/          # Reusable Streamlit UI pieces
+│   ├── services/            # API client, Supabase auth client
+│   ├── views/               # Page-level views (landing, scorer, history, resources)
+│   └── streamlit_app.py
+├── jupyter notebooks/        # EDA, dataset cleaning, embedding validation
+├── datasets/
+├── requirements.txt
+└── README.md
+```
 
-Exact routes depend on your implementation — see the auto-generated Swagger docs at `/docs` once the backend is running.
+## Empirical Validation
 
-## Scoring Methodology
-
-The overall score (0–100) is the direct sum of five weighted components, plus small bonuses and penalties, so the headline figure is fully reproducible from its parts.
-
-| Component | Max | What It Measures |
-|---|---|---|
-| Formatting | 20 | Section structure, bullet usage, summary length |
-| Keyword Relevance | 25 | Semantic (not lexical) coverage of job-description terms |
-| Content Quality | 25 | Action verbs, quantified achievements |
-| Skill Validation | 15 | Percentage of claimed skills substantiated in projects/experience |
-| ATS Compatibility | 15 | Parseability, absence of layout constructs that defeat parsers |
-
-Bonuses: 80% or higher skill validation rate; zero detected grammar errors.
-Penalty: graduated deduction when a large share of job-description keywords are missing from the resume.
-
-Score bands: below 50 = Poor, 50–69 = Fair, 70–89 = Good, 90 and above = Excellent.
-
-## Results
-
-Validated on a cleaned dataset of 284 resume-to-job-description pairs:
-
-- A correlation of 0.827 between computed Sentence-BERT similarity and human-assigned match labels.
-- Clear separation across tiers — mean similarity: High 0.809, Medium 0.636, Low 0.511.
-- Baseline embedding model MAE of 0.19 on held-out test data; raw similarity was found to systematically over-estimate weak matches, confirming the need for the multi-component design rather than a single similarity score.
-- On a representative real resume: strong surface scores (formatting 19/20, keywords 23/25, ATS 15/15) but only 5/15 on skill validation — just 13 of 41 claimed skills were substantiated. Final score: 81/100 — a false positive that a keyword-only ATS would have missed.
-
-## Limitations
-
-- English-language, text-extractable resumes only (no OCR for scanned documents yet).
-- No active demographic bias auditing or mitigation is implemented.
-- Validation dataset (284 pairs) supports relationship analysis, not model training.
-- Embedding model is used pre-trained; fine-tuning was attempted but not completed.
+Independent validation of the semantic matching approach on a cleaned dataset of 284 resume–job description pairs found a correlation of **0.827** between Sentence-BERT cosine similarity and the assigned match label, with mean similarities of 0.81 (high), 0.64 (medium) and 0.51 (low) — confirming clear separation between match tiers. A held-out evaluation of the pre-trained embedding model established a baseline **Mean Absolute Error of 0.19**, which also revealed that raw cosine similarity systematically over-estimates weak matches — the reason this project treats semantic similarity as one weighted input into the scoring engine rather than the score itself.
 
 ## Roadmap
 
-- Fine-tune the sentence embedding model on domain-specific resume-to-job-description pairs.
-- Bias-auditing dashboard, starting with name/pronoun redaction for name-blind scoring.
-- OCR support for scanned or image-based resumes.
-- Multilingual resume and job-description support.
-- Domain-specific skill ontology for equivalent-skill recognition.
-- Public API for third-party ATS/HRMS integration and a mobile-friendly recruiter interface.
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes
-4. Push to the branch and open a pull request
+- [ ] Fine-tune the embedding model on domain-specific resume/JD pairs
+- [ ] Bias-auditing dashboard for shortlisting outcomes
+- [ ] OCR support for scanned resumes
+- [ ] Multilingual resume and job description support
+- [ ] Public API for third-party ATS/HRMS integration
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for the full text.
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.

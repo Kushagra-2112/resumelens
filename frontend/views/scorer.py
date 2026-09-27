@@ -2,7 +2,6 @@ from typing import Optional
 
 import requests
 import streamlit as st
-
 from frontend.services import api_client
 from frontend.components.dashboard import display_results_dashboard
 

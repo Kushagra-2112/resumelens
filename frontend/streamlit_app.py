@@ -8,18 +8,17 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Configure page
 st.set_page_config(
-    page_title="ATS Resume Scorer",
-    page_icon="🎯",
+    page_title="ResumeLens",
+    page_icon=":material/manage_search:",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # Auth state. Populated by Supabase sign-in / sign-up / OAuth.
-# All four are None when signed out, all four are set when signed in.
 for key, default in [
     ("access_token", None),
     ("refresh_token", None),
-    ("user_id", None),       # Supabase auth user id (uuid); also used by api_client
+    ("user_id", None),
     ("user_email", None),
     ("auth_error", None),
     ("auth_info", None),
@@ -51,7 +50,7 @@ if (
 def load_css():
     try:
         css_path = Path(__file__).parent / 'assets' / 'styles.css'
-        with open(css_path, 'r') as f:
+        with open(css_path, 'r', encoding='utf-8') as f:
             return f'<style>{f.read()}</style>'
     except FileNotFoundError:
         return ''
@@ -62,41 +61,52 @@ st.markdown(load_css(), unsafe_allow_html=True)
 if 'current_view' not in st.session_state:
     st.session_state.current_view = 'landing'
 
+BRAND_HTML = (
+    '<div class="brand">'
+    '<svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true">'
+    '<rect width="28" height="28" rx="8" fill="#0E7C86"/>'
+    '<circle cx="13" cy="13" r="6" fill="none" stroke="#fff" stroke-width="2.4"/>'
+    '<path d="M17.6 17.6L21.5 21.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'
+    '</svg>'
+    '<div class="brand-name">Resume<span>Lens</span></div>'
+    '</div>'
+)
+
+NAV = [
+    ("landing",   "Home"),
+    ("scorer",    "ATS scorer"),
+    ("history",   "History"),
+    ("resources", "Resources"),
+]
+
 # Sidebar navigation
 with st.sidebar:
-    st.markdown("## Navigation")
+    st.markdown(BRAND_HTML, unsafe_allow_html=True)
 
-    if st.button("🏠 Home", use_container_width=True):
-        st.session_state.current_view = 'landing'
-        st.rerun()
-
-    if st.button("🎯 ATS Scorer", use_container_width=True):
-        st.session_state.current_view = 'scorer'
-        st.rerun()
-
-    if st.button("📊 History", use_container_width=True):
-        st.session_state.current_view = 'history'
-        st.rerun()
-
-    if st.button("📚 Resources", use_container_width=True):
-        st.session_state.current_view = 'resources'
-        st.rerun()
+    for view_key, label in NAV:
+        active = st.session_state.current_view == view_key
+        if st.button(
+            label,
+            key=f"nav_{view_key}",
+            use_container_width=True,
+            type="primary" if active else "secondary",
+        ):
+            st.session_state.current_view = view_key
+            st.rerun()
 
     st.markdown("---")
-    st.markdown("### 👤 Account")
+    st.markdown("### Account")
 
     from frontend.services import supabase_client
 
     if st.session_state.access_token:
-        # Signed-in state: show email + sign-out button.
         st.caption(f"Signed in as **{st.session_state.user_email}**")
-        if st.button("Sign out", use_container_width=True):
+        if st.button("Sign out", key="sign_out", use_container_width=True):
             supabase_client.sign_out()
             for k in ("access_token", "refresh_token", "user_id", "user_email"):
                 st.session_state[k] = None
             st.rerun()
     else:
-        # Signed-out state: tabs for sign-in vs sign-up + Google OAuth button.
         if st.session_state.auth_error:
             st.error(st.session_state.auth_error)
             st.session_state.auth_error = None
@@ -125,7 +135,7 @@ with st.sidebar:
         with tab_up:
             with st.form("signup_form", clear_on_submit=False):
                 email_up = st.text_input("Email", key="signup_email")
-                password_up = st.text_input("Password (min 6 chars)", type="password", key="signup_pw")
+                password_up = st.text_input("Password (min 6 characters)", type="password", key="signup_pw")
                 submitted_up = st.form_submit_button("Create account", use_container_width=True)
             if submitted_up:
                 result = supabase_client.sign_up_with_password(email_up, password_up)
@@ -133,7 +143,7 @@ with st.sidebar:
                     st.session_state.auth_error = result["error"]
                 elif result.get("pending_confirmation"):
                     st.session_state.auth_info = (
-                        f"Check your inbox — confirmation email sent to {result['email']}."
+                        f"Check your inbox. We sent a confirmation email to {result['email']}."
                     )
                 else:
                     st.session_state.access_token  = result["access_token"]
@@ -142,8 +152,10 @@ with st.sidebar:
                     st.session_state.user_email    = result["email"]
                 st.rerun()
 
-        st.markdown("<div style='text-align:center; margin: 8px 0; color:#94a3b8;'>or</div>",
-                    unsafe_allow_html=True)
+        st.markdown(
+            "<div style='text-align:center; margin: 10px 0; color:#5B6577; font-size:.9rem;'>or</div>",
+            unsafe_allow_html=True,
+        )
 
         oauth = supabase_client.google_oauth_url()
         if "error" in oauth:

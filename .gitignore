@@ -12,3 +12,11 @@ models/
 .ipynb_checkpoints/
 checkpoint-*/
 "@ | Out-File -FilePath .gitignore -Encoding utf8
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+backend/logs/
+*.log

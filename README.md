@@ -249,13 +249,8 @@ resumelens/
 └── README.md
 ```
 
-## Empirical Validation
-
-Independent validation of the semantic matching approach on a cleaned dataset of 284 resume–job description pairs found a correlation of **0.827** between Sentence-BERT cosine similarity and the assigned match label, with mean similarities of 0.81 (high), 0.64 (medium) and 0.51 (low) — confirming clear separation between match tiers. A held-out evaluation of the pre-trained embedding model established a baseline **Mean Absolute Error of 0.19**, which also revealed that raw cosine similarity systematically over-estimates weak matches — the reason this project treats semantic similarity as one weighted input into the scoring engine rather than the score itself.
-
 ## Roadmap
 
-- [ ] Fine-tune the embedding model on domain-specific resume/JD pairs
 - [ ] Bias-auditing dashboard for shortlisting outcomes
 - [ ] OCR support for scanned resumes
 - [ ] Multilingual resume and job description support
